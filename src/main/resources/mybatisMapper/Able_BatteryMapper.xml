@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chervon.iot.ablecloud.mapper.Able_BatteryMapper" >
+    <resultMap id="BaseResultMap" type="com.chervon.iot.ablecloud.model.Able_Battery" >
+        <id column="battery_id" property="battery_id" jdbcType="VARCHAR" />
+        <result column="battery_name" property="battery_name" jdbcType="VARCHAR" />
+        <result column="device_id" property="device_id" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        battery_id,battery_name,device_id
+    </sql>
+    <select id="selectListBattery" parameterType="java.lang.String" resultType="com.chervon.iot.ablecloud.model.Able_Battery">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM Able_Battery
+        WHERE device_id = #{device_id}
+    </select>
+</mapper>

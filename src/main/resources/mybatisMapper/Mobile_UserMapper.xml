@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chervon.iot.mobile.mapper.Mobile_UserMapper">
+  <resultMap id="BaseResultMap" type="com.chervon.iot.mobile.model.Mobile_User">
+   
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="sfdc_id" jdbcType="VARCHAR" property="sfdcId" />
+    <result column="longitude" jdbcType="NUMERIC" property="longitude" />
+    <result column="latitude" jdbcType="NUMERIC" property="latitude" />
+    <result column="photourl" jdbcType="VARCHAR" property="photourl" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="lastpasswordresetdate" jdbcType="TIMESTAMP" property="lastpasswordresetdate" />
+    <result column="enabled" jdbcType="BIT" property="enabled" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="role" jdbcType="VARCHAR" property="role" />
+    <result column="createdate" jdbcType="TIMESTAMP" property="createdate" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, password, sfdc_id, longitude, latitude, photourl, name, lastpasswordresetdate,
+    enabled, email, role, createdate,status
+  </sql>
+
+  <select id="getUserByEmail" parameterType="java.lang.String" resultMap="BaseResultMap">
+
+    select
+    <include refid="Base_Column_List" />
+    from mobile_user
+    where email = #{email,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getUserSfid" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from mobile_user
+    where sfdc_id = #{sfdc_id,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insert"  parameterType="com.chervon.iot.mobile.model.Mobile_User">
+   
+    insert into mobile_user ( password,
+      sfdc_id, longitude, latitude, 
+      photourl, name, lastpasswordresetdate, 
+      enabled, email, role, createdate,status
+      )
+    values ( #{password,jdbcType=VARCHAR},
+      #{sfdcId,jdbcType=VARCHAR}, #{longitude,jdbcType=NUMERIC}, #{latitude,jdbcType=NUMERIC}, 
+      #{photourl,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{lastpasswordresetdate,jdbcType=TIMESTAMP}, 
+      #{enabled,jdbcType=BIT}, #{email,jdbcType=VARCHAR}, #{role,jdbcType=VARCHAR}, #{createdate,jdbcType=TIMESTAMP} ,
+       #{status,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateBySfdcId" parameterType="com.chervon.iot.mobile.model.Mobile_User">
+
+    update mobile_user
+    <set >
+    <if test="password != null" >
+      password = #{password,jdbcType=VARCHAR},
+    </if>
+
+      <if test="longitude != null" >
+        longitude = #{longitude,jdbcType=NUMERIC},
+    </if>
+    <if test="latitude != null" >
+      latitude = #{latitude,jdbcType=NUMERIC},
+    </if>
+    <if test="photourl != null" >
+      photourl = #{photourl,jdbcType=VARCHAR},
+    </if>
+    <if test="name != null" >
+      name = #{name,jdbcType=VARCHAR},
+    </if>
+    <if test="lastpasswordresetdate != null" >
+      lastpasswordresetdate = #{lastpasswordresetdate,jdbcType=TIMESTAMP},
+    </if>
+    <if test="enabled != null" >
+      enabled = #{enabled,jdbcType=BIT},
+    </if>
+    <if test="role != null" >
+      role = #{role,jdbcType=VARCHAR},
+    </if>
+    <if test="createdate != null" >
+      createdate = #{createdate,jdbcType=TIMESTAMP},
+    </if>
+    <if test="status != null" >
+      status = #{status,jdbcType=VARCHAR},
+    </if>
+    <if test="email != null" >
+      email = #{email,jdbcType=VARCHAR},
+    </if>
+    </set>
+    where sfdc_id = #{sfdcId,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateModifyTime" parameterType="com.chervon.iot.mobile.model.Mobile_User">
+   
+    update mobile_user
+    set
+    lastpasswordresetdate = #{lastpasswordresetdate,jdbcType=TIMESTAMP}
+    where email = #{email,jdbcType=VARCHAR}
+  </update>
+  <update id="verified" parameterType="com.chervon.iot.mobile.model.Mobile_User">
+    update mobile_user
+    set
+     status = #{status,jdbcType=VARCHAR}
+    where email = #{email,jdbcType=VARCHAR}
+  </update>
+  <update id="resetPassword" parameterType="com.chervon.iot.mobile.model.Mobile_User">
+    update mobile_user
+    set
+    password = #{password,jdbcType=VARCHAR}
+    where email = #{email,jdbcType=VARCHAR}
+  </update>
+</mapper>
