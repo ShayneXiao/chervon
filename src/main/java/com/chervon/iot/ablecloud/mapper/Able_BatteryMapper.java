@@ -9,4 +9,5 @@ import java.util.List;
  */
 public interface Able_BatteryMapper {
    List<Able_Battery> selectListBattery(String device_id);
+   Able_Battery selectDeviceId(String battery_slot_id);
 }

@@ -8,6 +8,7 @@ import com.chervon.iot.ablecloud.model.Able_ResponseDeviceError;
 import com.chervon.iot.ablecloud.service.Able_DeviceErrorsService;
 import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.HttpUtils;
+import com.chervon.iot.common.util.GetUTCTime;
 import com.chervon.iot.common.util.HttpClientUtil;
 import com.chervon.iot.mobile.util.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -38,8 +36,6 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     @Resource
     private AbleDeviceErrorsMapper ableDeviceErrorsMapper;
 
-    @Autowired
-    private HttpUtils httpUtils;
     @Value("${ablecloud.url}")
     private String ableUrl;
 
@@ -93,7 +89,9 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         map = new HashMap(); attributes = new HashMap(); links = new HashMap();
 
         String method = "getData";
-        Map<String, String> signiture = httpUtils.getHeadMaps(method);
+        GetUTCTime getUTCTime = new GetUTCTime();
+        long timesStamp = getUTCTime.getCurrentUTCTimeStr(new Date());
+        Map<String,String> signiture=  HttpUtils.getHeadMaps(timesStamp,method);
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("sn", device_id);
         requestBody.put("type", "psStatus");

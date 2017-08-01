@@ -26,7 +26,7 @@ public class HttpUtils {
     //Able 签名的有效时长
     private static final long TIME_OUT = 31536000;
 	//主域
-	private static final String SUB_DOMAIN="chervon";
+	private static final String MAJOR_DOMAIN="chervon";
     /**
      * 获取用于签名字符串
      *
@@ -121,7 +121,7 @@ public class HttpUtils {
         headMaps.put("X-Zc-Access-Key",ACCESS_KEY);
        // String signString = "";
        // signString = TIME_OUT + "" + timesTamp/1000 + nonceStr + DEVELOPER_ID + "chervon" + method;
-		String signString=getSignString(DEVELOPER_ID,  SUB_DOMAIN,"",method ,timesTamp/1000,  TIME_OUT,  nonceStr);
+		String signString=getSignString(DEVELOPER_ID,  MAJOR_DOMAIN,"",method ,timesTamp/1000,  TIME_OUT,  nonceStr);
         headMaps.put("X-Zc-Developer-Signature",getSignature(SECRET_KEY,signString));
         return headMaps;
     }

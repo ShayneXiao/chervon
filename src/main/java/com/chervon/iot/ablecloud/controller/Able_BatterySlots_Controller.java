@@ -22,29 +22,36 @@ public class Able_BatterySlots_Controller {
     private String Base_Url;
     @Autowired
     private Able_BatterySlots_Service able_batterySlots_service;
-/**
- * 单个设备下所有得电池#@RequestParam(value = "page[number]",required = false)Integer pageNumber,@RequestParam(value = "page[size]",required = false)Integer pageSize
- **/
+    /**
+     * 单个设备下所有得电池#@RequestParam(value = "page[number]",required = false)Integer pageNumber,@RequestParam(value = "page[size]",required = false)Integer pageSize
+     **/
     @GetMapping("/devices/{device_id}/battery_slots")
     public ResponseEntity<?> batterySlots(@RequestHeader String Authorization,@PathVariable String device_id,@RequestParam(value = "page[number]",required = false)
             Integer pageNumber,@RequestParam(value = "page[size]",required = false)Integer pageSize )throws Exception{
-         return   able_batterySlots_service.batterySlots(Authorization,device_id,pageNumber,pageSize);
+        return   able_batterySlots_service.batterySlots(Authorization,device_id,pageNumber,pageSize);
 
     }
+    //指定电池包数据
+    @GetMapping("/battery_slots/{battery_slot_id}")
+    public  ResponseEntity<?> batterySlot(@RequestHeader String Authorization,@PathVariable String battery_slot_id)throws Exception {
+        return able_batterySlots_service.batterySlot(Authorization,battery_slot_id);
 
-    @RequestMapping(value = "/battery_slots/{battery_slot_id}")
-    public  ResponseEntity<?> batterySlot(@PathVariable String battery_slot_id) {
-        return null;
     }
+    //关联
     @RequestMapping(value = "/battery_slots/{battery_slot_id}/relationships/device")
-    public  ResponseEntity<?> batterySlotRelationship(@RequestHeader String Authorization, @PathVariable String battery_slot_id) {
+    public  ResponseEntity<?> batterySlotRelationship(@RequestHeader String Authorization, @PathVariable String battery_slot_id)throws Exception {
+        Map<String,Object>  respMap = new HashMap<>();
         Map<String,String> links = new HashMap<>();
         Map<String,String> data = new HashMap<>();
         links.put("self",Base_Url+"battery_slots/"+battery_slot_id+"/relationships");
         links.put("related",Base_Url+"battery_slots"+battery_slot_id+"/device");
         data.put("type","device");
-        able_batterySlots_service.selectDeviceId(battery_slot_id);
-        data.put("id",battery_slot_id);
-       return null;
+        String device_id=able_batterySlots_service.selectDeviceId(battery_slot_id);
+        data.put("id",device_id);
+        HttpHeaders httpHeaders=HttpHeader.HttpHeader();
+        httpHeaders.add("Authorization",Authorization);
+        respMap.put("links",links);
+        respMap.put("data",data);
+        return new ResponseEntity<Object>(respMap,httpHeaders,HttpStatus.OK);
     }
 }
