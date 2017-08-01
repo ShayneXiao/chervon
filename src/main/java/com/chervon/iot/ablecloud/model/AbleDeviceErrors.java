@@ -15,7 +15,7 @@ public class AbleDeviceErrors {
 
     private Boolean isfixed;
 
-    private Date createTime;
+    private Date timestamp;
 
     public Integer getId() {
         return id;
@@ -65,11 +65,11 @@ public class AbleDeviceErrors {
         this.isfixed = isfixed;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -52,4 +52,8 @@ public class Able_ResponseBattery {
     public void setLinks(Object links) {
         this.links = links;
     }
+
+    public Able_ResponseBattery(){
+
+    }
 }

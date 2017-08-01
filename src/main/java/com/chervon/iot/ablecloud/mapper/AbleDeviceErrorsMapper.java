@@ -3,6 +3,7 @@ import java.util.List;
 
 import com.chervon.iot.ablecloud.model.AbleDeviceErrors;
 import com.chervon.iot.ablecloud.model.AbleDeviceErrorsExample;
+import com.chervon.iot.ablecloud.model.Able_ResponseDeviceError;
 import org.apache.ibatis.annotations.Param;
 
 public interface AbleDeviceErrorsMapper {
@@ -27,4 +28,6 @@ public interface AbleDeviceErrorsMapper {
     int updateByPrimaryKeySelective(AbleDeviceErrors record);
 
     int updateByPrimaryKey(AbleDeviceErrors record);
+
+    List<Able_ResponseDeviceError> getDeviceErrorByID(String device_id);
 }

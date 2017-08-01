@@ -28,7 +28,7 @@ public class WebSecurityConfig {
         HTTPBearerAuthorizeAttribute httpBearerFilter = new HTTPBearerAuthorizeAttribute();
         registrationBean.setFilter(httpBearerFilter);
         List<String> urlPatterns = new ArrayList<String>();
-        urlPatterns.add("/api/v1/*");
+        urlPatterns.add("/sdsd/api/v1/*");
         registrationBean.setUrlPatterns(urlPatterns);
         return registrationBean;
     }

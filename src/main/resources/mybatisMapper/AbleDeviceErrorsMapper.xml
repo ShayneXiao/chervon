@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.chervon.iot.ablecloud.mapper.AbleDeviceErrorsMapper" >
-  <resultMap id="BaseResultMap" type="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrors" >
+  <resultMap id="BaseResultMap" type="com.chervon.iot.ablecloud.model.AbleDeviceErrors" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="sn" property="sn" jdbcType="VARCHAR" />
     <result column="recoverable" property="recoverable" jdbcType="BIT" />
     <result column="device" property="device" jdbcType="VARCHAR" />
     <result column="fault" property="fault" jdbcType="VARCHAR" />
     <result column="isfixed" property="isfixed" jdbcType="BIT" />
-    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="timestamp" property="timestamp" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -69,9 +69,9 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, sn, recoverable, device, fault, isfixed, create_time
+    id, sn, recoverable, device, fault, isfixed, timestamp
   </sql>
-  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrorsExample" >
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrorsExample" >
     select
     <if test="distinct" >
       distinct
@@ -86,7 +86,7 @@
     </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from able_device_errors
     where id = #{id,jdbcType=INTEGER}
@@ -95,21 +95,21 @@
     delete from able_device_errors
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <delete id="deleteByExample" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrorsExample" >
+  <delete id="deleteByExample" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrorsExample" >
     delete from able_device_errors
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrors" >
-    insert into able_device_errors (id, sn, recoverable, 
-      device, fault, isfixed, 
-      create_time)
-    values (#{id,jdbcType=INTEGER}, #{sn,jdbcType=VARCHAR}, #{recoverable,jdbcType=BIT}, 
-      #{device,jdbcType=VARCHAR}, #{fault,jdbcType=VARCHAR}, #{isfixed,jdbcType=BIT}, 
-      #{createTime,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrors" >
+    insert into able_device_errors (id, sn, recoverable,
+    device, fault, isfixed,
+    timestamp)
+    values (#{id,jdbcType=INTEGER}, #{sn,jdbcType=VARCHAR}, #{recoverable,jdbcType=BIT},
+    #{device,jdbcType=VARCHAR}, #{fault,jdbcType=VARCHAR}, #{isfixed,jdbcType=BIT},
+    #{timestamp,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrors" >
+  <insert id="insertSelective" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrors" >
     insert into able_device_errors
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -130,8 +130,8 @@
       <if test="isfixed != null" >
         isfixed,
       </if>
-      <if test="createTime != null" >
-        create_time,
+      <if test="timestamp != null" >
+        timestamp,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -153,12 +153,12 @@
       <if test="isfixed != null" >
         #{isfixed,jdbcType=BIT},
       </if>
-      <if test="createTime != null" >
-        #{createTime,jdbcType=TIMESTAMP},
+      <if test="timestamp != null" >
+        #{timestamp,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrorsExample" resultType="java.lang.Integer" >
+  <select id="countByExample" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrorsExample" resultType="java.lang.Integer" >
     select count(*) from able_device_errors
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
@@ -185,8 +185,8 @@
       <if test="record.isfixed != null" >
         isfixed = #{record.isfixed,jdbcType=BIT},
       </if>
-      <if test="record.createTime != null" >
-        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      <if test="record.timestamp != null" >
+        timestamp = #{record.timestamp,jdbcType=TIMESTAMP},
       </if>
     </set>
     <if test="_parameter != null" >
@@ -196,17 +196,17 @@
   <update id="updateByExample" parameterType="map" >
     update able_device_errors
     set id = #{record.id,jdbcType=INTEGER},
-      sn = #{record.sn,jdbcType=VARCHAR},
-      recoverable = #{record.recoverable,jdbcType=BIT},
-      device = #{record.device,jdbcType=VARCHAR},
-      fault = #{record.fault,jdbcType=VARCHAR},
-      isfixed = #{record.isfixed,jdbcType=BIT},
-      create_time = #{record.createTime,jdbcType=TIMESTAMP}
+    sn = #{record.sn,jdbcType=VARCHAR},
+    recoverable = #{record.recoverable,jdbcType=BIT},
+    device = #{record.device,jdbcType=VARCHAR},
+    fault = #{record.fault,jdbcType=VARCHAR},
+    isfixed = #{record.isfixed,jdbcType=BIT},
+    timestamp = #{record.timestamp,jdbcType=TIMESTAMP}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrors" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrors" >
     update able_device_errors
     <set >
       <if test="sn != null" >
@@ -224,20 +224,26 @@
       <if test="isfixed != null" >
         isfixed = #{isfixed,jdbcType=BIT},
       </if>
-      <if test="createTime != null" >
-        create_time = #{createTime,jdbcType=TIMESTAMP},
+      <if test="timestamp != null" >
+        timestamp = #{timestamp,jdbcType=TIMESTAMP},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.jiuyue.mlratingstudio.common.pojo.AbleDeviceErrors" >
+  <update id="updateByPrimaryKey" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrors" >
     update able_device_errors
     set sn = #{sn,jdbcType=VARCHAR},
       recoverable = #{recoverable,jdbcType=BIT},
       device = #{device,jdbcType=VARCHAR},
       fault = #{fault,jdbcType=VARCHAR},
       isfixed = #{isfixed,jdbcType=BIT},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
+      timestamp = #{timestamp,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="getDeviceErrorByID" parameterType="string" resultType="com.chervon.iot.ablecloud.model.Able_ResponseDeviceError">
+    SELECT de.id, de.sn, de.recoverable, de.timestamp, dt.type_name, ded.code, ded.desc
+    from able_device_errors de, able_device_errordesc ded, able_device_type dt
+    where de.sn = #{device_id, jdbcType=VARCHAR} and de.device = dt.type and de.fault = ded.code
+  </select>
 </mapper>

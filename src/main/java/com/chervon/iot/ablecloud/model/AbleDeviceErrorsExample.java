@@ -495,63 +495,63 @@ public class AbleDeviceErrorsExample {
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeIsNull() {
-            addCriterion("create_time is null");
+        public Criteria andTimestampIsNull() {
+            addCriterion("timestamp is null");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeIsNotNull() {
-            addCriterion("create_time is not null");
+        public Criteria andTimestampIsNotNull() {
+            addCriterion("timestamp is not null");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeEqualTo(Date value) {
-            addCriterion("create_time =", value, "createTime");
+        public Criteria andTimestampEqualTo(Date value) {
+            addCriterion("timestamp =", value, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeNotEqualTo(Date value) {
-            addCriterion("create_time <>", value, "createTime");
+        public Criteria andTimestampNotEqualTo(Date value) {
+            addCriterion("timestamp <>", value, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeGreaterThan(Date value) {
-            addCriterion("create_time >", value, "createTime");
+        public Criteria andTimestampGreaterThan(Date value) {
+            addCriterion("timestamp >", value, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
-            addCriterion("create_time >=", value, "createTime");
+        public Criteria andTimestampGreaterThanOrEqualTo(Date value) {
+            addCriterion("timestamp >=", value, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeLessThan(Date value) {
-            addCriterion("create_time <", value, "createTime");
+        public Criteria andTimestampLessThan(Date value) {
+            addCriterion("timestamp <", value, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
-            addCriterion("create_time <=", value, "createTime");
+        public Criteria andTimestampLessThanOrEqualTo(Date value) {
+            addCriterion("timestamp <=", value, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeIn(List<Date> values) {
-            addCriterion("create_time in", values, "createTime");
+        public Criteria andTimestampIn(List<Date> values) {
+            addCriterion("timestamp in", values, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeNotIn(List<Date> values) {
-            addCriterion("create_time not in", values, "createTime");
+        public Criteria andTimestampNotIn(List<Date> values) {
+            addCriterion("timestamp not in", values, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeBetween(Date value1, Date value2) {
-            addCriterion("create_time between", value1, value2, "createTime");
+        public Criteria andTimestampBetween(Date value1, Date value2) {
+            addCriterion("timestamp between", value1, value2, "timestamp");
             return (Criteria) this;
         }
 
-        public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
-            addCriterion("create_time not between", value1, value2, "createTime");
+        public Criteria andTimestampNotBetween(Date value1, Date value2) {
+            addCriterion("timestamp not between", value1, value2, "timestamp");
             return (Criteria) this;
         }
     }

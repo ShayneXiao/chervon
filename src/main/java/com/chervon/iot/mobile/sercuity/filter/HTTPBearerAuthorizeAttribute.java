@@ -61,7 +61,7 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
         }
         String servletPath = httpServletRequest.getServletPath();
         System.out.println(servletPath.substring(0,servletPath.lastIndexOf("/"))+"####");
-        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa")){
+        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/device/createDeviceError")){
             chain.doFilter(request, response);
             return;
         }
