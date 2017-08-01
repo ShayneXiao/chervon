@@ -16,7 +16,8 @@ public class MybatisConfig2 {
         Properties p = new Properties();
         p.setProperty("offsetAsPageNum", "true");
         p.setProperty("rowBoundsWithCount", "true");
-        p.setProperty("reasonable", "true");
+        p.setProperty("pageSizeZero", "true");
+        p.setProperty("dialect","postgresql");
         pageHelper.setProperties(p);
         return pageHelper;
     }

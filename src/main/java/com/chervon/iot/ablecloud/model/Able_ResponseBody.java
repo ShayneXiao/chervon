@@ -1,24 +1,17 @@
 package com.chervon.iot.ablecloud.model;
 
-import com.chervon.iot.mobile.model.entity.Relationship;
-import org.springframework.stereotype.Component;
-
-import java.util.Map;
-
 /**
- * Created by Admin on 2017/7/12.
+ * Created by 喷水君 on 2017/8/1.
  */
-public class Able_ResponseBattery {
-   private Object data;
-   private  Object included;
-   private Object meta;
-   private Object links;
+public class Able_ResponseBody {
+    private Object data;
+    private  Object included;
+    private Object meta;
 
-    public Able_ResponseBattery(Object data, Object included, Object meta, Object links) {
+    public Able_ResponseBody(Object data, Object included, Object meta) {
         this.data = data;
         this.included = included;
         this.meta = meta;
-        this.links = links;
     }
 
     public Object getData() {
@@ -43,13 +36,5 @@ public class Able_ResponseBattery {
 
     public void setMeta(Object meta) {
         this.meta = meta;
-    }
-
-    public Object getLinks() {
-        return links;
-    }
-
-    public void setLinks(Object links) {
-        this.links = links;
     }
 }

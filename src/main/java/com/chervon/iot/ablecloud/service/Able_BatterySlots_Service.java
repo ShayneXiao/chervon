@@ -9,5 +9,6 @@ import java.io.IOException;
  */
 public interface Able_BatterySlots_Service {
    ResponseEntity<?> batterySlots(String Authorization,String device_id,int pageNumber,int pageSize)throws IOException,Exception;
-   String selectDeviceId(String deviceId);
+   String selectDeviceId(String battery_slot_id)throws Exception;
+   ResponseEntity<?> batterySlot(String Authorization,String battery_slot_id)throws Exception;
 }
