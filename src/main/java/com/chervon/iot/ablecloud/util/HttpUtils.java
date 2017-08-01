@@ -3,38 +3,30 @@ package com.chervon.iot.ablecloud.util;
 import com.chervon.iot.common.util.GetUTCTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-@Component
 public class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
     private static final String ENCODING = "UTF-8";
     private static final String HASH = "HmacSHA256";
-
-    @Value("${ablecloud.developerId}")
-    private  long developerId;
-
-    @Value("${ablecloud.accessKey}")
-    private  String accessKey;
-
-    @Value("${ablecloud.timeout}")
-    private  long timeout;
-
-    @Value("${ableCloud.secretKey}")
-    private String secretKey;
-    @Value("${ableCloud.subDomain}")
-    private String subDomain;
-
+	
+	//Able 后台开发者的ID
+    private static final long DEVELOPER_ID = 482;
+    //Able 开发者签名认证
+    private static final String ACCESS_KEY = "ce28dbd04048029e80c6f1975765cc80";
+    //Able 签名所需的密钥
+    private static final String SECRET_KEY = "4b30af824096f78480cb92546b8b7e1b";
+    //Able 签名的有效时长
+    private static final long TIME_OUT = 31536000;
+	//主域
+	private static final String SUB_DOMAIN="chervon";
     /**
      * 获取用于签名字符串
      *
@@ -54,12 +46,10 @@ public class HttpUtils {
                 nonce +
                 String.valueOf(developerId) +
                 method +
-                majorDomain+
-                subDomain
-              ;
+                majorDomain +
+                subDomain;
         return stringToSign;
     }
-
 
     /**
      * 获取X-Zc-Developer-Signature的签名值
@@ -73,6 +63,7 @@ public class HttpUtils {
         try {
             String encodedSign = URLEncoder.encode(stringToSign, ENCODING);
             try {
+                System.out.println("sk="+sk+",stringToSign="+stringToSign);
                 Mac mac = Mac.getInstance(HASH);
                 mac.init(new SecretKeySpec(sk.getBytes(ENCODING), HASH));
                 byte[] hashData = mac.doFinal(encodedSign.getBytes(ENCODING));
@@ -93,15 +84,14 @@ public class HttpUtils {
         } catch (UnsupportedEncodingException e) {
             logger.warn("encode error, string[" + stringToSign + "] e:" + e);
         }
+
         return signature;
     }
-
-
 
 //其中，timestamp精确到秒；nonce是一个随机字符串（一般选则长度为16个字符）。如：
 
 
-    public  String getNonce(long seed, int length) {
+    public static String getNonce(long seed, int length) {
         String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYAC0123456789";
         Random random = new Random();
         random.setSeed(seed);
@@ -112,26 +102,27 @@ public class HttpUtils {
         return sb.toString();
     }
 
-    public  Map<String,String> getHeadMaps(String method){
-        GetUTCTime getUTCTime = new GetUTCTime();
-        long seconds = getUTCTime.getCurrentUTCTimeStr(new Date())/1000;//=参数正确？====================
-      //  long seconds = System.currentTimeMillis()/1000;
-        System.out.println("!!!"+System.currentTimeMillis());
+  
+
+    public static Map<String,String> getHeadMaps(long timesTamp, String method){
+      //  GetUTCTime getUTCTime = new GetUTCTime();
+//        long mill = getUTCTime.getCurrentUTCTimeStr();
+
         Map<String,String> headMaps = new HashMap<>();
         headMaps.put("Content-Type","application/x-zc-object");
-        headMaps.put("X-Zc-Major-Domain",subDomain);
+        headMaps.put("X-Zc-Major-Domain","chervon");
         headMaps.put("X-Zc-Sub-Domain","");
-        headMaps.put("X-Zc-Developer-Id",String.valueOf(developerId));
-        headMaps.put("X-Zc-Timestamp",String.valueOf(seconds));
-        headMaps.put("X-Zc-Timeout",String.valueOf(timeout));
-        String nonceStr = getNonce(seconds,16);
-        headMaps.put("X-Zc-Nonce",nonceStr);
-        headMaps.put("X-Zc-Access-Key",accessKey);
+        headMaps.put("X-Zc-Developer-Id",String.valueOf(DEVELOPER_ID));
+        headMaps.put("X-Zc-Timestamp",String.valueOf(timesTamp/1000));
+        headMaps.put("X-Zc-Timeout",String.valueOf(TIME_OUT));
 
-         String signString=getSignString(developerId,  subDomain,
-                 "",method ,
-                seconds,  timeout,  nonceStr);
-        headMaps.put("X-Zc-Developer-Signature",getSignature(secretKey,signString));
+        String nonceStr = getNonce(timesTamp,16);
+        headMaps.put("X-Zc-Nonce",nonceStr);
+        headMaps.put("X-Zc-Access-Key",ACCESS_KEY);
+       // String signString = "";
+       // signString = TIME_OUT + "" + timesTamp/1000 + nonceStr + DEVELOPER_ID + "chervon" + method;
+		String signString=getSignString(DEVELOPER_ID,  SUB_DOMAIN,"",method ,timesTamp/1000,  TIME_OUT,  nonceStr);
+        headMaps.put("X-Zc-Developer-Signature",getSignature(SECRET_KEY,signString));
         return headMaps;
     }
 }
