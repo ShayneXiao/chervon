@@ -3,8 +3,8 @@ package com.chervon.iot.ablecloud.service.imp;
 import com.chervon.iot.ablecloud.mapper.AbleDeviceErrorsMapper;
 import com.chervon.iot.ablecloud.model.AbleDeviceErrors;
 import com.chervon.iot.ablecloud.model.Able_DevicePojo;
-import com.chervon.iot.ablecloud.model.Able_ResponseBattery;
 import com.chervon.iot.ablecloud.model.Able_ResponseDeviceError;
+import com.chervon.iot.ablecloud.model.Able_ResponseListBody;
 import com.chervon.iot.ablecloud.service.Able_DeviceErrorsService;
 import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.HttpUtils;
@@ -50,7 +50,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
 
     @Override
     public ResponseEntity<?> getDeviceErrors(String device_id, int pageNumber, int pageSize) throws Exception {
-        Able_ResponseBattery able_responseBattery = new Able_ResponseBattery();
+        Able_ResponseListBody able_responseBattery = new Able_ResponseListBody();
 
         List able_ResponseDeviceErrors = new ArrayList();
         PageHelper.startPage(pageNumber, pageSize);

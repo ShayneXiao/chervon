@@ -54,8 +54,9 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         if(!pageInfo.isHasNextPage()) {
             resPagationLink.put("next", null);
         } else {
-        }resPagationLink.put("next","https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+device_id+"/battery_slots?page[number]="+(pageNumber+1)+"&page[size]="+pageSize);
-        if(pageInfo.isIsLastPage()){
+            resPagationLink.put("next", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_id + "/battery_slots?page[number]=" + (pageNumber + 1) + "&page[size]=" + pageSize);
+        }
+        if(pageInfo.getLastPage() <= pageNumber){
             resPagationLink.put("last",null);
         } else {
             resPagationLink.put("last", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_id + "/battery_slots?page[number]=" + pageInfo.getLastPage() + "&page[size]=" + pageSize);
