@@ -25,6 +25,9 @@ public class Able_ResponseBatteryIncluded {
         return type;
     }
 
+    public Able_ResponseBatteryIncluded() {
+    }
+
     public void setType(String type) {
         this.type = type;
     }

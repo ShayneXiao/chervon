@@ -24,6 +24,7 @@ public class Able_ResponseBatteryData {
         this.links = links;
     }
 
+
     public String getType() {
         return type;
     }

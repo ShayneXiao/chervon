@@ -53,7 +53,7 @@ public class Able_ResponseListBody {
         this.links = links;
     }
 
-    public Able_ResponseBattery(){
+    public Able_ResponseListBody(){
 
     }
 }

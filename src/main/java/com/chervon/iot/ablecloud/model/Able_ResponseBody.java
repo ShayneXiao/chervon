@@ -8,6 +8,9 @@ public class Able_ResponseBody {
     private  Object included;
     private Object meta;
 
+    public Able_ResponseBody() {
+    }
+
     public Able_ResponseBody(Object data, Object included, Object meta) {
         this.data = data;
         this.included = included;
