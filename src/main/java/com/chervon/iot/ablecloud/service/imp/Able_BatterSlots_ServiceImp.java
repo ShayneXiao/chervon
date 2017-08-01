@@ -36,7 +36,7 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     public ResponseEntity<?> batterySlots(String Authorization,String device_id,int pageNumber,int pageSize)throws IOException,Exception {
         List<Able_Battery> batteryList = able_batteryMapper.selectListBattery(device_id);
        //   PageInfo<Able_Battery> pageInfo = new PageInfo<Able_Battery>(batteryList);
-        String method ="getData";
+        String method = "getData";
         Map<String,String> signiture=  httpUtils.getHeadMaps(method);
         Map<String,String> requestBody = new HashMap<>();
         requestBody.put("sn",device_id);
@@ -149,5 +149,10 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type","application/vnd.api+json");
         return new ResponseEntity<Object>(able_responseBattery,headers, HttpStatus.OK);
+    }
+
+    @Override
+    public String selectDeviceId(String deviceId) {
+        return null;
     }
 }
