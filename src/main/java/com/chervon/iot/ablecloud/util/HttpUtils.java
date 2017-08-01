@@ -16,8 +16,8 @@ public class HttpUtils {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
     private static final String ENCODING = "UTF-8";
     private static final String HASH = "HmacSHA256";
-	
-	//Able 后台开发者的ID
+
+    //Able 后台开发者的ID
     private static final long DEVELOPER_ID = 482;
     //Able 开发者签名认证
     private static final String ACCESS_KEY = "ce28dbd04048029e80c6f1975765cc80";
@@ -25,8 +25,8 @@ public class HttpUtils {
     private static final String SECRET_KEY = "4b30af824096f78480cb92546b8b7e1b";
     //Able 签名的有效时长
     private static final long TIME_OUT = 31536000;
-	//主域
-	private static final String MAJOR_DOMAIN="chervon";
+    //主域
+    private static final String MAJOR_DOMAIN="chervon";
     /**
      * 获取用于签名字符串
      *
@@ -93,6 +93,7 @@ public class HttpUtils {
 
     public static String getNonce(long seed, int length) {
         String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYAC0123456789";
+        System.out.println(1);
         Random random = new Random();
         random.setSeed(seed);
         StringBuilder sb = new StringBuilder(length);
@@ -102,15 +103,15 @@ public class HttpUtils {
         return sb.toString();
     }
 
-  
+
 
     public static Map<String,String> getHeadMaps(long timesTamp, String method){
-      //  GetUTCTime getUTCTime = new GetUTCTime();
+        //  GetUTCTime getUTCTime = new GetUTCTime();
 //        long mill = getUTCTime.getCurrentUTCTimeStr();
 
         Map<String,String> headMaps = new HashMap<>();
         headMaps.put("Content-Type","application/x-zc-object");
-        headMaps.put("X-Zc-Major-Domain","chervon");
+        headMaps.put("X-Zc-Major-Domain",MAJOR_DOMAIN);
         headMaps.put("X-Zc-Sub-Domain","");
         headMaps.put("X-Zc-Developer-Id",String.valueOf(DEVELOPER_ID));
         headMaps.put("X-Zc-Timestamp",String.valueOf(timesTamp/1000));
@@ -119,9 +120,9 @@ public class HttpUtils {
         String nonceStr = getNonce(timesTamp,16);
         headMaps.put("X-Zc-Nonce",nonceStr);
         headMaps.put("X-Zc-Access-Key",ACCESS_KEY);
-       // String signString = "";
-       // signString = TIME_OUT + "" + timesTamp/1000 + nonceStr + DEVELOPER_ID + "chervon" + method;
-		String signString=getSignString(DEVELOPER_ID,  MAJOR_DOMAIN,"",method ,timesTamp/1000,  TIME_OUT,  nonceStr);
+        // String signString = "";
+        // signString = TIME_OUT + "" + timesTamp/1000 + nonceStr + DEVELOPER_ID + "chervon" + method;
+        String signString=getSignString(DEVELOPER_ID,  MAJOR_DOMAIN,"",method ,timesTamp/1000,  TIME_OUT,  nonceStr);
         headMaps.put("X-Zc-Developer-Signature",getSignature(SECRET_KEY,signString));
         return headMaps;
     }
