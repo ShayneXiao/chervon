@@ -4,6 +4,7 @@ import com.chervon.iot.ablecloud.mapper.Able_BatteryMapper;
 import com.chervon.iot.ablecloud.model.*;
 import com.chervon.iot.ablecloud.service.Able_BatterySlots_Service;
 import com.chervon.iot.ablecloud.util.HttpUtils;
+import com.chervon.iot.common.util.GetUTCTime;
 import com.chervon.iot.common.util.HttpClientUtil;
 import com.chervon.iot.mobile.util.JsonUtils;
 import com.github.pagehelper.PageInfo;
@@ -16,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.print.Pageable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by 喷水君 on 2017/7/26.
@@ -28,16 +26,17 @@ import java.util.Map;
 public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
    @Autowired
     private Able_BatteryMapper able_batteryMapper;
-    @Autowired
-    private HttpUtils httpUtils;
     @Value("${ablecloud.url}")
     private String ableUrl;
     @Override
     public ResponseEntity<?> batterySlots(String Authorization,String device_id,int pageNumber,int pageSize)throws IOException,Exception {
         List<Able_Battery> batteryList = able_batteryMapper.selectListBattery(device_id);
-       //   PageInfo<Able_Battery> pageInfo = new PageInfo<Able_Battery>(batteryList);
-        String method = "getData";
-        Map<String,String> signiture=  httpUtils.getHeadMaps(method);
+        Pageable.start
+        PageInfo<Able_Battery> pageInfo = new PageInfo<Able_Battery>(batteryList);
+        GetUTCTime getUTCTime = new GetUTCTime();
+        long timesStamp = getUTCTime.getCurrentUTCTimeStr(new Date());
+        String method ="getData";
+        Map<String,String> signiture=  HttpUtils.getHeadMaps(timesStamp,method);
         Map<String,String> requestBody = new HashMap<>();
         requestBody.put("sn",device_id);
         requestBody.put("type","psStatus");
@@ -100,7 +99,7 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
             }
         }
         //分页
-        int totalPage = able_responseBatteryDataList.size() / pageSize;
+     /*   int totalPage = able_responseBatteryDataList.size() / pageSize;
         if(totalPage < 1) totalPage = 1;
         int begin = (pageNumber - 1) *  totalPage;
         int pageSizeSum = begin + pageSize;
@@ -109,7 +108,7 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         if(pageNumber > totalPage) begin = able_responseBatteryDataList.size();
         for(int i = begin; i < pageSizeSum; i++ ){
             able_responseBatteryDataListPagination.add(able_responseBatteryDataList.get(i));
-        }
+        }*/
         Map<String,String> resPagationLink = new HashMap<>();
         resPagationLink.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+device_id+"/battery_slots?");
        // resPagationLink.put()
