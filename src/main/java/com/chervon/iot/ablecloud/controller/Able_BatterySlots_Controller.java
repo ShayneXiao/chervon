@@ -28,7 +28,7 @@ public class Able_BatterySlots_Controller {
     @GetMapping("/devices/{device_id}/battery_slots")
     public ResponseEntity<?> batterySlots(@RequestHeader String Authorization,@PathVariable String device_id,@RequestParam(value = "page[number]",required = false)
             Integer pageNumber,@RequestParam(value = "page[size]",required = false)Integer pageSize )throws Exception{
-        return   able_batterySlots_service.batterySlots(Authorization,device_id,pageNumber,pageSize);
+         return   able_batterySlots_service.batterySlots(Authorization,device_id,pageNumber,pageSize);
 
     }
 
