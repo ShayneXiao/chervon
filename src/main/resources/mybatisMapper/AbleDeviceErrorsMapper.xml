@@ -102,10 +102,10 @@
     </if>
   </delete>
   <insert id="insert" parameterType="com.chervon.iot.ablecloud.model.AbleDeviceErrors" >
-    insert into able_device_errors (id, sn, recoverable,
+    insert into able_device_errors (sn, recoverable,
     device, fault, isfixed,
     timestamp)
-    values (#{id,jdbcType=INTEGER}, #{sn,jdbcType=VARCHAR}, #{recoverable,jdbcType=BIT},
+    values (#{sn,jdbcType=VARCHAR}, #{recoverable,jdbcType=BIT},
     #{device,jdbcType=VARCHAR}, #{fault,jdbcType=VARCHAR}, #{isfixed,jdbcType=BIT},
     #{timestamp,jdbcType=TIMESTAMP})
   </insert>
@@ -246,4 +246,11 @@
     from able_device_errors de, able_device_errordesc ded, able_device_type dt
     where de.sn = #{device_id, jdbcType=VARCHAR} and de.device = dt.type and de.fault = ded.code
   </select>
+
+  <select id="getDeviceErrorByDeviceErrorID" parameterType="int" resultType="com.chervon.iot.ablecloud.model.Able_ResponseDeviceError">
+    SELECT de.id, de.sn, de.recoverable, de.timestamp, dt.type_name, ded.code, ded.desc
+    from able_device_errors de, able_device_errordesc ded, able_device_type dt
+    where de.id = #{id,jdbcType=INTEGER} and de.device = dt.type and de.fault = ded.code
+  </select>
+
 </mapper>

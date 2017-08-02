@@ -72,4 +72,13 @@ public class AbleDeviceErrors {
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
+
+    public AbleDeviceErrors(String sn, Boolean recoverable, String device, String fault) {
+        this.sn = sn;
+        this.recoverable = recoverable;
+        this.device = device;
+        this.fault = fault;
+    }
+
+    public AbleDeviceErrors(){}
 }

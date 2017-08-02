@@ -1,10 +1,7 @@
 package com.chervon.iot.ablecloud.service.imp;
 
 import com.chervon.iot.ablecloud.mapper.AbleDeviceErrorsMapper;
-import com.chervon.iot.ablecloud.model.AbleDeviceErrors;
-import com.chervon.iot.ablecloud.model.Able_DevicePojo;
-import com.chervon.iot.ablecloud.model.Able_ResponseDeviceError;
-import com.chervon.iot.ablecloud.model.Able_ResponseListBody;
+import com.chervon.iot.ablecloud.model.*;
 import com.chervon.iot.ablecloud.service.Able_DeviceErrorsService;
 import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.HttpUtils;
@@ -15,7 +12,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,11 +37,12 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> createDeviceError(AbleDeviceErrors ableDeviceErrors) {
+    public Map createDeviceError(AbleDeviceErrors ableDeviceErrors) {
+        Map map = new HashMap();
         ableDeviceErrorsMapper.insert(ableDeviceErrors);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/vnd.api+json");
-        return new ResponseEntity<Object>("导入错误信息成功", headers, HttpStatus.OK);
+        map.put("msg", "success");
+        map.put("code", "200");
+        return map;
     }
 
     @Override
@@ -62,7 +59,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             device = new HashMap(); links = new HashMap(); data = new HashMap();
             Able_ResponseDeviceError able_responseDeviceError = able_responseDeviceErrors.get(i);
             map.put("type", "device_errors");
-            map.put("id", device_id);
+            map.put("id", able_responseDeviceError.getId());
 
             attributes.put("code", able_responseDeviceError.getCode());
             attributes.put("description", able_responseDeviceError.getDesc());
@@ -73,14 +70,14 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             device.put("links", links);
 
             data.put("type", "devices");
-            data.put("id", device_id);
+            data.put("id", able_responseDeviceError.getId());
             device.put("data", data);
 
             relationships.put("device", device);
             map.put("relationships", relationships);
 
             links = new HashMap();
-            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_id);
+            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + able_responseDeviceError.getId());
             map.put("links", links);
             able_ResponseDeviceErrors.add(map);
         }
@@ -102,15 +99,15 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         map.put("type", "devices");
         map.put("id", device_id);
         attributes = new HashMap();
+        //待定
         attributes.put("name", "T-800");
         attributes.put("status", DeviceUtils.getDeviceStatus(able_devicePojo.getChargeState()));
-        JsonNode jsonNode = MAPPER.readTree(jsonData);
-        attributes.put("output_watts_hours", 10);  //DeviceUtils.getDumpEnergy(jsonNode)
-        attributes.put("output_watts", 100); //
-        attributes.put("capacity_percentage", 83);   //
-        attributes.put("charge_time_seconds", 1000);  //jsonNode.get("totalRemainingTime")
+        JsonNode jsonNode = MAPPER.readTree(responseJson);
+        attributes.put("output_watts_hours", DeviceUtils.getDumpEnergy(jsonNode));
+        attributes.put("output_watts", able_devicePojo.getAc1Power() + able_devicePojo.getAc2Power() + able_devicePojo.getAc3Power());
+        attributes.put("capacity_percentage", DeviceUtils.getDumpEnergyPercent(jsonNode));
+        attributes.put("charge_time_seconds", jsonNode.get("totalRemainingTime"));
         //待定
-        attributes.put("charge_time_seconds", 0);
         attributes.put("discharge_time_seconds", 0);
         //待定
         attributes.put("is_low_power", true);
@@ -148,5 +145,78 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type","application/vnd.api+json");
         return new ResponseEntity<Object>(able_responseBattery,headers, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(Integer device_error_id) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+
+        Map responseData = new HashMap();
+        Able_ResponseDeviceError ableResponseDeviceError = ableDeviceErrorsMapper.getDeviceErrorByDeviceErrorID(device_error_id);
+        if(ableResponseDeviceError != null){
+            Map data = new HashMap(); Map attributes = new HashMap(); Map relationships = new HashMap();
+            Map device = new HashMap(); Map links = new HashMap(); Map dataChild = new HashMap();
+            data.put("type", "device_errors");
+            data.put("id", device_error_id);
+
+            attributes.put("code", ableResponseDeviceError.getCode());
+            attributes.put("description", ableResponseDeviceError.getDesc());
+            data.put("attributes", attributes);
+
+            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_error_id + "/relationships/device");
+            links.put("related", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_error_id + "/device");
+            dataChild.put("type", "devices");
+            dataChild.put("id", device_error_id);
+
+            device.put("links", links);
+            device.put("data", dataChild);
+            relationships.put("device", device);
+            data.put("relationships", relationships);
+            Map linksChild = new HashMap();
+            linksChild.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_error_id);
+            data.put("links", linksChild);
+
+
+            String method = "getData";
+            GetUTCTime getUTCTime = new GetUTCTime();
+            long timesStamp = getUTCTime.getCurrentUTCTimeStr(new Date());
+            Map<String,String> signiture=  HttpUtils.getHeadMaps(timesStamp,method);
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("sn", ableResponseDeviceError.getSn());
+            requestBody.put("type", "psStatus");
+            String jsonData = JsonUtils.objectToJson(requestBody);
+            String responseJson = HttpClientUtil.doPostJson(ableUrl + "getData", jsonData, signiture);
+            Able_DevicePojo able_devicePojo = JsonUtils.jsonToPojo(responseJson, Able_DevicePojo.class);
+
+            List included = new ArrayList();
+
+            dataChild = new HashMap();
+            dataChild.put("type", "devices");
+            dataChild.put("id", ableResponseDeviceError.getSn());
+            Map attributesChild = new HashMap();
+            //待定
+            attributesChild.put("name", "T-800");
+            attributesChild.put("status", DeviceUtils.getDeviceStatus(able_devicePojo.getChargeState()));
+            JsonNode jsonNode = MAPPER.readTree(responseJson);
+            attributesChild.put("output_watts_hours", DeviceUtils.getDumpEnergy(jsonNode));
+            attributesChild.put("output_watts", able_devicePojo.getAc1Power() + able_devicePojo.getAc2Power() + able_devicePojo.getAc3Power());
+            attributesChild.put("capacity_percentage", DeviceUtils.getDumpEnergyPercent(jsonNode));
+            attributesChild.put("charge_time_seconds", jsonNode.get("totalRemainingTime"));
+            //待定
+            attributesChild.put("discharge_time_seconds", 0);
+            //待定
+            attributesChild.put("is_low_power", true);
+            dataChild.put("attributes", attributesChild);
+            links = new HashMap();
+            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_error_id);
+            dataChild.put("links", links);
+            included.add(dataChild);
+            Map meta = new HashMap();
+            responseData.put("data", data);
+            responseData.put("included", included);
+            responseData.put("meta", meta);
+        }
+        return new ResponseEntity<Object>(responseData,headers, HttpStatus.OK);
     }
 }
