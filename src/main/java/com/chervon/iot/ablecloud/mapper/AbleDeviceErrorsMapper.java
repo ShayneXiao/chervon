@@ -30,4 +30,6 @@ public interface AbleDeviceErrorsMapper {
     int updateByPrimaryKey(AbleDeviceErrors record);
 
     List<Able_ResponseDeviceError> getDeviceErrorByID(String device_id);
+
+    Able_ResponseDeviceError getDeviceErrorByDeviceErrorID(Integer device_error_id);
 }

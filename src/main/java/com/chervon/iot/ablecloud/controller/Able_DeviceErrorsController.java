@@ -2,13 +2,13 @@ package com.chervon.iot.ablecloud.controller;
 
 import com.chervon.iot.ablecloud.model.AbleDeviceErrors;
 import com.chervon.iot.ablecloud.service.Able_DeviceErrorsService;
+import com.chervon.iot.mobile.util.JavaMailUtil;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by Shayne on 2017/8/1.
@@ -17,16 +17,27 @@ import javax.annotation.Resource;
 @RequestMapping("/api/v1")
 public class Able_DeviceErrorsController {
     @Resource
+    private JavaMailUtil javaMailUtil;
+    @Resource
     private Able_DeviceErrorsService able_deviceErrorsService;
 
-    @RequestMapping("/devices/createDeviceError")
-    public ResponseEntity<?> createDeviceError(AbleDeviceErrors ableDeviceErrors){
+    @PostMapping("/devices/createDeviceError")
+    public Map createDeviceError(String sn, long timestamp, boolean recoverable, String device, String fault){
+        AbleDeviceErrors ableDeviceErrors = new AbleDeviceErrors(sn, recoverable, device, fault);
+        Date date = new Date(timestamp);
+        ableDeviceErrors.setTimestamp(date);
+        ableDeviceErrors.setIsfixed(false);
         return able_deviceErrorsService.createDeviceError(ableDeviceErrors);
     }
 
-    @RequestMapping("/devices/{device_id}/device_errors")
+    @GetMapping("/devices/{device_id}/device_errors")
     public ResponseEntity<?> getDeviceErrors(@PathVariable("device_id")String device_id,
                                              @RequestParam("page[number]")Integer pageNumber, @RequestParam("page[size]")Integer pageSize) throws Exception {
         return able_deviceErrorsService.getDeviceErrors(device_id, pageNumber, pageSize);
+    }
+
+    @GetMapping("/device_errors/{device_error_id}")
+    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(@PathVariable("device_error_id")Integer device_error_id) throws Exception {
+        return able_deviceErrorsService.getDeviceErrorByDeviceErrorID(device_error_id);
     }
 }
