@@ -103,7 +103,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         jwtTokenUtil.setExpiration(expiration1);
         String token = jwtTokenUtil.generateToken(user, device);
         //发送email
-        sendEmail.sendEmail("Bearer "+ url + token, user.getEmail(), user.getName());
+        sendEmail.sendEmail(url+"Bearer "+ token, user.getEmail(), user.getName());
 
         mobile_userMapper.insert(user);
         //用户信息放入redis
