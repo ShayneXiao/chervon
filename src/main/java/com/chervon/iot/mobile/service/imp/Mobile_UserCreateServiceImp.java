@@ -54,7 +54,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
     @Autowired
     private Mobile_User mobileUser;
     @Autowired
-    private SendEmail sendEmail;
+    private JavaMailUtil sendEmail;
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -103,7 +103,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         jwtTokenUtil.setExpiration(expiration1);
         String token = jwtTokenUtil.generateToken(user, device);
         //发送email
-        sendEmail.sendAttachmentsMail(user.getEmail(), url + "Bearer " + token);
+        sendEmail.sendEmail("Bearer "+ url + token, user.getEmail(), user.getName());
 
         mobile_userMapper.insert(user);
         //用户信息放入redis
@@ -210,7 +210,8 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             if (jsonNode.get("success").asText().equals("true")){
                 jwtTokenUtil.setExpiration(expiration1);
                  String token = jwtTokenUtil.generateToken(user, device);
-                sendEmail.sendAttachmentsMail(user.getEmail(), url + "Bearer " + token);
+
+                sendEmail.sendEmail(url + "Bearer " + token,user.getEmail(),user.getName() );
                 mobile_userMapper.updateByPrimaryKey(user);
                 redisTemplate.delete(email);
                 redisTemplate.delete(user.getSfdcId());

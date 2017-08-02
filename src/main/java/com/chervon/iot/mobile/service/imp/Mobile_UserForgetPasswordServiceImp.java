@@ -15,10 +15,7 @@ import com.chervon.iot.mobile.model.entity.ResponseData;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.service.Mobile_UserForgetPasswordService;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
-import com.chervon.iot.mobile.util.ErrorResponseUtil;
-import com.chervon.iot.mobile.util.JsonUtils;
-import com.chervon.iot.mobile.util.MyUtils;
-import com.chervon.iot.mobile.util.SendEmail;
+import com.chervon.iot.mobile.util.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +57,7 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
     @Autowired
     private ResponseBody responseBody;
     @Autowired
-    private SendEmail sendEmail;
+    private JavaMailUtil sendEmail;
     @Autowired
     private Sfdc_Request sfdc_request;
     @Value("${email.url}")
@@ -90,8 +87,8 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         jwtTokenUtil.setExpiration(expirationhours);
         if (mobile_user != null) {
             final String token = jwtTokenUtil.generateToken(mobile_user, device);
-            String url = emailUrl + mobile_user.getSfdcId() + "/Bearer "+token;
-            sendEmail.sendAttachmentsMail(email, url);
+            String url = emailUrl + "/Bearer " + token;
+            sendEmail.sendEmail(url,email,mobile_user.getName());
             responData.setType(type);
             responData.setId("/Bearer "+token);
             Map<String, String> attribute = new HashMap<>();
