@@ -46,9 +46,9 @@ public class BasicAuthorizeTokenUtil {
                         this.user = mobile_userLoginService.getUserByEmail(UserArray[0]);
                         System.out.println("password==="+user.getPassword());
                         System.out.println("email==="+user.getEmail());
-                        if(user.getStatus().equals("unverified")){
+                       /* if(user.getStatus().equals("unverified")){
                             return ResultStatusCode.SC_FORBIDDEN;
-                        }
+                        }*/
                         if(this.user != null && UserArray[1].equals(this.user.getPassword())){
                             System.out.println("===========OK=============");
                             return ResultStatusCode.SC_OK;

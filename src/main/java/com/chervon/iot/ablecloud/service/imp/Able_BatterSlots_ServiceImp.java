@@ -32,7 +32,6 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     private static final ObjectMapper mapper = new ObjectMapper();
     @Autowired
     private Able_BatteryMapper able_batteryMapper;
-
     @Value("${ablecloud.url}")
     private String ableUrl;
     //一个设备下所有的电池包

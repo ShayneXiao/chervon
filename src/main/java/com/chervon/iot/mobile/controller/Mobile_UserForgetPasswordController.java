@@ -60,7 +60,8 @@ public class Mobile_UserForgetPasswordController {
     public ResponseEntity<?> resetPassword(@RequestHeader String Authorization, @RequestBody String jsonData)throws SQLException,Exception {
         JsonNode jsonNode = mapper.readTree(jsonData);
         mobile_user.setEmail(jwtTokenUtil.getEmailFromToken(Authorization.substring(7)));
+
         mobile_user.setPassword(jsonNode.get("data").get("attributes").get("password").asText());
-        return mobile_userForgetPasswordService.resetPassword(mobile_user);
+        return mobile_userForgetPasswordService.resetPassword(jsonNode.get("data").get("type").asText(),Authorization.substring(7),mobile_user);
     }
 }

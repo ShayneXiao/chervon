@@ -23,15 +23,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mobile.device.Device;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
@@ -73,24 +72,33 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
     @Value("${jwt.expirationhours}")
     private Long expirationhours;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+    /**
+     * 忘记密码，发送邮件重置密码
+     * */
     @Override
     public ResponseEntity<?> forgetPassword(String type, String email, Device device) throws SQLException, Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/vnd.api+json");
-        mobile_user = mobile_userMapper.getUserByEmail(email);
+        HttpHeaders headers =HttpHeader.HttpHeader();
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+        //从reids中拿取数据
+        mobile_user=(Mobile_User) operations.get(email);
+        if(mobile_user==null){
+            mobile_user = mobile_userMapper.getUserByEmail(email);
+        }
+        //设置1小时token
         jwtTokenUtil.setExpiration(expirationhours);
         if (mobile_user != null) {
             final String token = jwtTokenUtil.generateToken(mobile_user, device);
-            String url = emailUrl + mobile_user.getSfdcId() + "/" + token;
+            String url = emailUrl + mobile_user.getSfdcId() + "/Bearer "+token;
             sendEmail.sendAttachmentsMail(email, url);
-            System.out.println("sendEmail");
             responData.setType(type);
-            responData.setId(mobile_user.getSfdcId());
+            responData.setId("/Bearer "+token);
             Map<String, String> attribute = new HashMap<>();
             attribute.put("email", email);
             responData.setAttributes(attribute);
             Map<String, String> link = new HashMap<>();
-            link.put("self", "//private-b1af72-egoapi.apiary-mock.com/api/v1/resets/" + mobile_user.getSfdcId());
+            link.put("self", "//private-b1af72-egoapi.apiary-mock.com/api/v1/resets/Bearer "+token);
             responData.setLinks(link);
             List<Included> includedList = new ArrayList<>();
             responseBody.setIncluded(includedList);
@@ -104,18 +112,34 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
     }
 
+    /**
+     * 重新为用户重置密码
+     * @param mobile_user 部分用户信息
+     * @return
+     * @throws SQLException
+     * @throws Exception
+     */
     @Override
-    public ResponseEntity<?> resetPassword(Mobile_User mobile_user) throws SQLException, Exception {
+    @Transactional
+    public ResponseEntity<?> resetPassword(String type,String id,Mobile_User mobile_user) throws SQLException, Exception {
         HttpHeaders headers = HttpHeader.HttpHeader();
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
         mobile_userMapper.resetPassword(mobile_user);
         mobile_user = mobile_userMapper.getUserByEmail(mobile_user.getEmail());
+        //更新redis数据
+        operations.set(mobile_user.getEmail(), mobile_user);
+        operations.set(mobile_user.getSfdcId(), mobile_user);
+
         sfdc_request = new Sfdc_Request(mobile_user.getName(),null,mobile_user.getName(),
                 mobile_user.getEmail(),mobile_user.getPassword(),mobile_user.getStatus());
         String json = JsonUtils.objectToJson(sfdc_request);
+        //调SFDC接口
         String jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUser" + app_key));
         JsonNode jsonNode = mapper.readTree(jsonData);
+        //如果成功
         if (jsonNode.get("success").asText().equals("true")) {
-            ResponseBody responseBody = mobile_userLoginService.loginReturn(mobile_user);
+            ResponseBody responseBody = mobile_userLoginService.loginReturn(type,id,mobile_user);
+            headers.add("Authorization","Bearer "+id);
             return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
         }
         ResultMsg resultMsg = ErrorResponseUtil.serverError();
