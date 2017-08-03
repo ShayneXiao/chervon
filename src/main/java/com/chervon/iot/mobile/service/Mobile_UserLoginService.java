@@ -12,7 +12,7 @@ import java.util.Date;
  */
 public interface Mobile_UserLoginService {
     Mobile_User getUserByEmail(String email)throws SQLException;
-    ResponseBody loginReturn(Mobile_User mobile_user);
-     void modifyTime(Mobile_User mobile_user)throws SQLException;
+    ResponseBody loginReturn(String type,String Authorization,Mobile_User mobile_user);
+    void modifyTime(Mobile_User mobile_user)throws SQLException;
 
 }
