@@ -1,10 +1,14 @@
 package com.chervon.iot.mobile.controller;
 
+import com.chervon.iot.common.common_util.HttpHeader;
+import com.chervon.iot.common.exception.ErrorInfo;
 import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.service.Mobile_UserForgetPasswordService;
+import com.chervon.iot.mobile.service.imp.Mobile_UserLoginServiceImp;
+import com.chervon.iot.mobile.util.ErrorResponseUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.mail.MessagingException;
@@ -20,12 +24,15 @@ import org.springframework.mobile.device.Device;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import com.chervon.iot.mobile.model.entity.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Boy on 2017/6/26.
@@ -42,6 +49,8 @@ public class Mobile_UserForgetPasswordController {
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
     private Mobile_UserForgetPasswordService mobile_userForgetPasswordService;
+    @Autowired
+    private Mobile_UserLoginServiceImp mobile_userLoginServiceImp;
 
     @RequestMapping(value = "/resets", method= RequestMethod.POST)
     public ResponseEntity<?> createReset(@RequestBody String jsonData, Device device)throws SQLException,IOException,Exception{
@@ -52,8 +61,26 @@ public class Mobile_UserForgetPasswordController {
     }
 
     @RequestMapping(value = "/resets/{Authorization}")
-    public ResponseEntity<?> resetPassword(@PathVariable String Authorization)throws SQLException,Exception{
-        return  null;
+    public ModelAndView resetPassword(@PathVariable String Authorization)throws SQLException,Exception{
+        String email=jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+        ModelAndView mav = new ModelAndView();
+        HttpHeaders httpHeaders = HttpHeader.HttpHeader();
+        httpHeaders.add("Authorization",Authorization);
+        if(email!=null){
+            Mobile_User mobileuser=mobile_userLoginServiceImp.getUserByEmail(email);
+            if(mobileuser!=null){
+                if(jwtTokenUtil.validateToken(Authorization.substring(7),mobile_user)==true){
+
+                    Map<String,String> resets = new HashMap<>();
+                    resets.put("type","resets");
+                    resets.put("id",mobileuser.getSfdcId());
+                    mav.addObject(resets);
+                    mav.setViewName("resetPassword");
+                    return mav;
+                }
+            }
+        }
+        return null;
     }
 
     @RequestMapping(value = "/resets" ,method=RequestMethod.PATCH)
