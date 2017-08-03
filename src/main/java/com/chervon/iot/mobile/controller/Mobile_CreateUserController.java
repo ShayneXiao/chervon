@@ -1,4 +1,5 @@
 package com.chervon.iot.mobile.controller;
+import com.chervon.iot.common.common_util.HttpHeader;
 import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.mobile.model.Mobile_User;
@@ -44,8 +45,7 @@ public class Mobile_CreateUserController {
     //创建用户
     @RequestMapping(value = "/users", method = RequestMethod.POST)
     public ResponseEntity<?> ceateUser(@RequestBody String jsonData, Device device)throws SQLException,Exception{
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type","application/vnd.api+json");
+        HttpHeaders headers = HttpHeader.HttpHeader();
         //json解析
         JsonNode jsonNode = mapper.readTree(jsonData);
         String password=jsonNode.get("data").get("attributes").get("password").asText();
@@ -55,7 +55,7 @@ public class Mobile_CreateUserController {
         //通过email查询是否该email已经被注册
         Mobile_User mobile_user=mobile_userLoginService.getUserByEmail(email);
         //已注册
-      if (mobile_user!=null){
+        if (mobile_user!=null){
             ResultMsg resultMsg =  ErrorResponseUtil.conflict();
             return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_CONFLICT.getErrcode()));
         }
@@ -83,7 +83,6 @@ public class Mobile_CreateUserController {
         String password=jsonNode.get("data").get("attributes").get("password").asText();
         String email=jsonNode.get("data").get("attributes").get("email").asText();
         String name=jsonNode.get("data").get("attributes").get("name").asText();
-        mobileUser.setCreatedate(new Date());
         mobileUser.setPassword(password);
         mobileUser.setEmail(email);
         mobileUser.setEnabled(true);
@@ -91,12 +90,10 @@ public class Mobile_CreateUserController {
         mobileUser.setSfdcId(user_id);
         return mobile_userCreateService.updateUser(Authorization,device,mobileUser);
     }
-//邮箱email链接验证
+    //邮箱email链接验证
     @RequestMapping(value = "/users/aa/{Authorization}" ,method= RequestMethod.GET)
     public String updateUser(@PathVariable String Authorization)throws SQLException,Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type","application/vnd.api+json");
-        System.out.println("aa"+Authorization);
+        HttpHeaders headers = HttpHeader.HttpHeader();
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
         boolean flag =mobile_userCreateService.verified(email);
         if (flag==true){
@@ -104,4 +101,4 @@ public class Mobile_CreateUserController {
         }
         return  "error";
     }
-    }
+}

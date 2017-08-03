@@ -169,7 +169,7 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
 
         //获取user的sfid
         Able_Device device = deviceMapper.selectByPrimaryKey(sn);
-        Mobile_User user = userMapper.getUserSfid(device.getUserSfid());
+        Mobile_User user = userMapper.getUserSfid(device.getUsersfid());
         String user_sfid = user.getSfdcId();
 
         //拼装getConfirmUpdateResult参数
