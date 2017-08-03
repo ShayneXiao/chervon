@@ -38,7 +38,7 @@ public class Able_Firmware_Controller {
      * @param device_id
      * @return
      */
-    @RequestMapping("devices/{device_id}/firmware")
+    @GetMapping("devices/{device_id}/firmware")
     public ResponseEntity readFirmware(@RequestHeader String Authorization, @PathVariable String device_id) throws Exception {
         Map<String, String> paramMap = new HashMap<>();
         String email = jwtTokenUtil.getEmailFromToken(Authorization);
@@ -61,7 +61,7 @@ public class Able_Firmware_Controller {
      * @param device_id
      * @return
      */
-    @RequestMapping("devices/{device_id}/firmware")
+    @PostMapping("devices/{device_id}/firmware")
     public ResponseEntity updateFirmware(@RequestHeader String Authorization,
                                          @PathVariable String device_id,
                                          @RequestBody String requestJson) throws Exception {
