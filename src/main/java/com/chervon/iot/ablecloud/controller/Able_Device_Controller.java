@@ -38,14 +38,15 @@ public class Able_Device_Controller {
      */
     @RequestMapping(value = "/devices", method = RequestMethod.GET)
     public ResponseEntity<?> listDevice(@RequestHeader String Authorization, @RequestParam String number, @RequestParam String size) throws Exception {
-        String email = jwtTokenUtil.getEmailFromToken(Authorization);
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
         int pageNum = 0;
         int pageSize = 0;
         try {
             pageNum = Integer.parseInt(number);
             pageSize = Integer.parseInt(size);
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("");
+            throw new NumberFormatException("类型匹配异常");
         }
         Able_ResponseListBody responseBody = deviceService.selectDeviceList(email, pageNum, pageSize);
 

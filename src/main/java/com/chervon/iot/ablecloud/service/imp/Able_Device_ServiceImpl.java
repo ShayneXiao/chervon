@@ -495,7 +495,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
             error.setSource(source);
             return error;
         }
-        String userSfdcId = device.getUserSfid();
+        String userSfdcId = device.getUsersfid();
         Mobile_User mobileUser = userMapper.getUserSfid(userSfdcId);
 
         Map<String, String> loadAndGetDataParam = new HashMap<>();
@@ -841,7 +841,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
             return error;
         }
 
-        Mobile_User mobileUser = userMapper.getUserSfid(device.getUserSfid());
+        Mobile_User mobileUser = userMapper.getUserSfid(device.getUsersfid());
 
         /**从able获取controlDevice数据*/
         //拼装参数
@@ -1212,7 +1212,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
             error.setSource(source);
             return error;
         }
-        Mobile_User user = userMapper.getUserSfid(device.getUserSfid());
+        Mobile_User user = userMapper.getUserSfid(device.getUsersfid());
 
         /**封装responseBody中的links*/
         Map<String, String> contentLinks = new HashMap<>();
