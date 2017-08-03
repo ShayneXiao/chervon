@@ -60,6 +60,10 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
             return;
         }
         String servletPath = httpServletRequest.getServletPath();
+        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/resets") && httpServletRequest.getMethod().equals("GET")){
+            chain.doFilter(request, response);
+            return;
+        }
         if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/device/createDeviceError")){
             chain.doFilter(request, response);
             return;
