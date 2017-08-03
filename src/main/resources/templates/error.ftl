@@ -12,10 +12,10 @@
 <div id="wrapper"><a class="logo" href="/"></a>
   <div id="main">
     <header id="header">
-      <h1><img src="/images/IconTexto_WebDev_009.jpg" width="128" height="128"><span class="sub">验证失败，请重新验证</span></h1>
+      <h1><img src="/images/chervonIOT.png" width="128" height="128"><span class="sub">verification failed，Please re-verify</span></h1>
     </header>
     <div id="content">
-      <h2>请重新验证！</h2>
+      <h2> Please re-verify！</h2>
 
     </div>
   </div>

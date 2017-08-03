@@ -32,6 +32,7 @@ public class GetUTCTime {
     }
 
     public long getCurrentUTCTimeStr(Date date) {
+
         cal.setTime(date);
         System.out.println("local="+cal.getTime());
         System.out.println("扣除前 = " + cal.getTimeInMillis());// 等效System.currentTimeMillis() , 统一值，不分时区

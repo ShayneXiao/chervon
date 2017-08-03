@@ -13,10 +13,10 @@
 <div id="wrapper"><a class="logo" href="/"></a>
     <div id="main">
         <header id="header">
-            <h1><img src="/images/IconTexto_WebDev_009.jpg" width="128" height="128" /><span class="sub">验证成功</span></h1>
+            <h1><img src="/images/chervonIOT.png" width="128" height="128" /><span class="sub">verify successfully</span></h1>
         </header>
         <div id="content">
-            <h2>请前往app端登录！</h2>
+            <h2>Please go to the App login ！</h2>
             <div class="utilities">
                 <form  name="formsearch" action="/plus/search.php" id="formkeyword">
                     <div class="input-container">

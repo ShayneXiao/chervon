@@ -61,7 +61,7 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
         responseData.setType(type);
         responseData.setId(mobile_user.getSfdcId());
         Map<String,String> attributeMap = new HashMap<String,String>();
-        String utcTime =getUTime.getUTCTime(getUTime.getCurrentUTCTimeStr(jwtTokenUtil.getCreatedDateFromToken(Authorization.substring(7))),"yyyy-MM-dd'T'HH:mm:ssZ");;
+        String utcTime =getUTime.getUTCTime(getUTime.getCurrentUTCTimeStr(jwtTokenUtil.getCreatedDateFromToken(Authorization)),"yyyy-MM-dd'T'HH:mm:ssZ");;
         attributeMap.put("created_at",utcTime);
         responseData.setAttributes(attributeMap);
         Map<String,String> links = new HashMap<String, String>();

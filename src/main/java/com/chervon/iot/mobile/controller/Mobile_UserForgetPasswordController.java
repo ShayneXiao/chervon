@@ -59,8 +59,8 @@ public class Mobile_UserForgetPasswordController {
         String  email =jsonNode.get("data").get("attributes").get("email").asText();
         return mobile_userForgetPasswordService.forgetPassword(type, email,device);
     }
-
-    @RequestMapping(value = "/resets/{Authorization}")
+    //email链接接收转向
+    @GetMapping("/resets/{Authorization}")
     public ModelAndView resetPassword(@PathVariable String Authorization)throws SQLException,Exception{
         String email=jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
         ModelAndView mav = new ModelAndView();
@@ -70,19 +70,21 @@ public class Mobile_UserForgetPasswordController {
             Mobile_User mobileuser=mobile_userLoginServiceImp.getUserByEmail(email);
             if(mobileuser!=null){
                 if(jwtTokenUtil.validateToken(Authorization.substring(7),mobile_user)==true){
-
                     Map<String,String> resets = new HashMap<>();
                     resets.put("type","resets");
-                    resets.put("id",mobileuser.getSfdcId());
+                    resets.put("id",Authorization);
                     mav.addObject(resets);
                     mav.setViewName("resetPassword");
                     return mav;
                 }
+                mav.setViewName("AuthorizationDefeat");
+                return mav;
             }
         }
-        return null;
+        mav.setViewName("ServerError");
+        return mav;
     }
-
+    //
     @RequestMapping(value = "/resets" ,method=RequestMethod.PATCH)
     public ResponseEntity<?> resetPassword(@RequestHeader String Authorization, @RequestBody String jsonData)throws SQLException,Exception {
         JsonNode jsonNode = mapper.readTree(jsonData);
