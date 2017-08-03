@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -42,18 +43,18 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     @Override
     @Transactional
     public Map createDeviceError(AbleDeviceErrors ableDeviceErrors) {
-        ValueOperations valueOperations = redisTemplate.opsForValue();
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String key = ableDeviceErrors.getSn() + ableDeviceErrors.getRecoverable() + ableDeviceErrors.getDevice() + ableDeviceErrors.getFault();
         Object deviceErrors = valueOperations.get(key);
         Map map = new HashMap();
         map.put("code", "200");
         if(deviceErrors == null){
             ableDeviceErrorsMapper.insert(ableDeviceErrors);
-            valueOperations.set(key, "1");
-            map.put("msg", "This Device Error has existed ");
+            valueOperations.set(key, JsonUtils.objectToJson(ableDeviceErrors));
+            map.put("msg", "success");
             return map;
         }
-        map.put("msg", "success");
+        map.put("msg", "This Device Error has existed ");
         return map;
     }
 
@@ -233,12 +234,20 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     }
 
     @Override
-    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault) {
-        ValueOperations valueOperations = redisTemplate.opsForValue();
+    @Transactional
+    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault, String status) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String key = sn + recoverable + device + fault;
-        Object deviceErrors = valueOperations.get(key);
+        String deviceErrors = valueOperations.get(key);
         if(deviceErrors != null){
             redisTemplate.delete(key);
+
+            AbleDeviceErrors ableDeviceErrors = JsonUtils.jsonToPojo(deviceErrors.toString(), AbleDeviceErrors.class);
+            ableDeviceErrors.setStatus(status);
+            AbleDeviceErrorsExample ableDeviceErrorsExample = new AbleDeviceErrorsExample();
+            AbleDeviceErrorsExample.Criteria criteria = ableDeviceErrorsExample.createCriteria();
+            criteria.andDeviceEqualTo(device).andSnEqualTo(sn).andRecoverableEqualTo(recoverable).andFaultEqualTo(fault);
+            ableDeviceErrorsMapper.updateByExampleSelective(ableDeviceErrors, ableDeviceErrorsExample);
         }
         Map map = new HashMap();
         map.put("code", "200");

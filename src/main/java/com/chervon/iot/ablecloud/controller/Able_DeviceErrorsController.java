@@ -27,7 +27,7 @@ public class Able_DeviceErrorsController {
         AbleDeviceErrors ableDeviceErrors = new AbleDeviceErrors(sn, recoverable, device, fault);
         Date date = new Date(timestamp);
         ableDeviceErrors.setTimestamp(date);
-        ableDeviceErrors.setIsfixed(false);
+        ableDeviceErrors.setStatus("pending");
         return able_deviceErrorsService.createDeviceError(ableDeviceErrors);
     }
 
@@ -43,7 +43,7 @@ public class Able_DeviceErrorsController {
     }
 
     @PostMapping("/devices/endedDeviceError")
-    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault){
-        return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault);
+    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault, String status){
+        return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault, status);
     }
 }

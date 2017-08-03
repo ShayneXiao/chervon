@@ -15,5 +15,5 @@ public interface Able_DeviceErrorsService {
 
     ResponseEntity<?> getDeviceErrorByDeviceErrorID(Integer device_error_id) throws Exception;
 
-    Map endedDeviceError(String sn, boolean recoverable, String device, String fault);
+    Map endedDeviceError(String sn, boolean recoverable, String device, String fault, String status);
 }

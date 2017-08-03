@@ -13,7 +13,7 @@ public class AbleDeviceErrors {
 
     private String fault;
 
-    private Boolean isfixed;
+    private String status;
 
     private Date timestamp;
 
@@ -57,12 +57,12 @@ public class AbleDeviceErrors {
         this.fault = fault == null ? null : fault.trim();
     }
 
-    public Boolean getIsfixed() {
-        return isfixed;
+    public String getStatus() {
+        return status;
     }
 
-    public void setIsfixed(Boolean isfixed) {
-        this.isfixed = isfixed;
+    public void setStatus(String status) {
+        this.status = status == null ? null : status.trim();
     }
 
     public Date getTimestamp() {

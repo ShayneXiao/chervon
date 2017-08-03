@@ -435,63 +435,73 @@ public class AbleDeviceErrorsExample {
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedIsNull() {
-            addCriterion("isfixed is null");
+        public Criteria andStatusIsNull() {
+            addCriterion("status is null");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedIsNotNull() {
-            addCriterion("isfixed is not null");
+        public Criteria andStatusIsNotNull() {
+            addCriterion("status is not null");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedEqualTo(Boolean value) {
-            addCriterion("isfixed =", value, "isfixed");
+        public Criteria andStatusEqualTo(String value) {
+            addCriterion("status =", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedNotEqualTo(Boolean value) {
-            addCriterion("isfixed <>", value, "isfixed");
+        public Criteria andStatusNotEqualTo(String value) {
+            addCriterion("status <>", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedGreaterThan(Boolean value) {
-            addCriterion("isfixed >", value, "isfixed");
+        public Criteria andStatusGreaterThan(String value) {
+            addCriterion("status >", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedGreaterThanOrEqualTo(Boolean value) {
-            addCriterion("isfixed >=", value, "isfixed");
+        public Criteria andStatusGreaterThanOrEqualTo(String value) {
+            addCriterion("status >=", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedLessThan(Boolean value) {
-            addCriterion("isfixed <", value, "isfixed");
+        public Criteria andStatusLessThan(String value) {
+            addCriterion("status <", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedLessThanOrEqualTo(Boolean value) {
-            addCriterion("isfixed <=", value, "isfixed");
+        public Criteria andStatusLessThanOrEqualTo(String value) {
+            addCriterion("status <=", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedIn(List<Boolean> values) {
-            addCriterion("isfixed in", values, "isfixed");
+        public Criteria andStatusLike(String value) {
+            addCriterion("status like", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedNotIn(List<Boolean> values) {
-            addCriterion("isfixed not in", values, "isfixed");
+        public Criteria andStatusNotLike(String value) {
+            addCriterion("status not like", value, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedBetween(Boolean value1, Boolean value2) {
-            addCriterion("isfixed between", value1, value2, "isfixed");
+        public Criteria andStatusIn(List<String> values) {
+            addCriterion("status in", values, "status");
             return (Criteria) this;
         }
 
-        public Criteria andIsfixedNotBetween(Boolean value1, Boolean value2) {
-            addCriterion("isfixed not between", value1, value2, "isfixed");
+        public Criteria andStatusNotIn(List<String> values) {
+            addCriterion("status not in", values, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusBetween(String value1, String value2) {
+            addCriterion("status between", value1, value2, "status");
+            return (Criteria) this;
+        }
+
+        public Criteria andStatusNotBetween(String value1, String value2) {
+            addCriterion("status not between", value1, value2, "status");
             return (Criteria) this;
         }
 
