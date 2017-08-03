@@ -1,9 +1,11 @@
 package com.chervon.iot.common.bulk;
 
+import com.chervon.iot.common.mq.jdbcutils.JDBCUtils;
 import com.sforce.async.*;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -19,6 +21,9 @@ import java.util.*;
 public class Bulk {
     public List<Long> ids;  //bulk操作的每条记录对应的数据库中的id的集合
     private String authEndpoint = "https://test.salesforce.com/services/Soap/u/40.0";
+
+    @Autowired
+    private JDBCUtils jdbcUtils;
 
     /**
      * 创建一个批量api作业并以csv文件的方式上传批量作业
@@ -289,6 +294,6 @@ public class Bulk {
      * @param isSuccess
      */
     private void updateById(List<Long> ids, String isSuccess){
-
+        jdbcUtils.updateBatch(ids,isSuccess);
     }
 }

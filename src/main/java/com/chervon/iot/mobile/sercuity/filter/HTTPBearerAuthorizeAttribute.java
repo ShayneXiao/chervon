@@ -60,7 +60,6 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
             return;
         }
         String servletPath = httpServletRequest.getServletPath();
-        System.out.println(servletPath.substring(0,servletPath.lastIndexOf("/"))+"####");
         if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/device/createDeviceError")){
             chain.doFilter(request, response);
             return;
@@ -84,7 +83,7 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
                     //异常报500错误return
                     HttpServletResponse httpResponse = (HttpServletResponse) response;
                     httpResponse.setCharacterEncoding("UTF-8");
-                    httpResponse.setContentType("application/json; charset=utf-8");
+                    httpResponse.setContentType("application/vnd.api+json; charset=utf-8");
                     httpResponse.setStatus(ResultStatusCode.INTERNAL_SERVER_ERROR.getErrcode());
                     ObjectMapper mapper = new ObjectMapper();
                     ResultMsg  resultMsg =  ErrorResponseUtil.serverError();
@@ -104,7 +103,7 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
         //错误返回验证失败
             HttpServletResponse httpResponse = (HttpServletResponse) response;
             httpResponse.setCharacterEncoding("UTF-8");
-            httpResponse.setContentType("application/json; charset=utf-8");
+            httpResponse.setContentType("application/vnd.api+json; charset=utf-8");
             httpResponse.setStatus(ResultStatusCode.SC_PERMISSION_DENIED.getErrcode());
             ObjectMapper mapper = new ObjectMapper();
             ResultMsg  resultMsg =  ErrorResponseUtil.unauthorized();

@@ -8,7 +8,7 @@ import java.util.Map;
  * @Author: Mike Xu.
  * @Date: Created in 20:58 2017/6/26
  * @Description:
- * @Modified By:在error内部类中添加了一个空参构造
+ * @Modified By:
  */
 public class ResultMsg {
     public List<Error> getErrors() {
@@ -30,9 +30,6 @@ public class ResultMsg {
         private String title;
         private String message;
         private Map<String,?> source;
-
-        public Error() {
-        }
 
         public Error(int status, String title, String message, Map<String, ?> source) {
             this.status = status;

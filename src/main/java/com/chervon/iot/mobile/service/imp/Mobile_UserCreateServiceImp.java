@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,7 @@ import java.util.Map;
 @Service
 public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
     private static final ObjectMapper mapper = new ObjectMapper();
+
     public Object[] included = new Object[0];
     @Autowired
     private Mobile_UserMapper mobile_userMapper;
@@ -50,6 +53,10 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
     private Sfdc_Request sfdc_request;
     @Autowired
     private Mobile_User mobileUser;
+    @Autowired
+    private JavaMailUtil sendEmail;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Value("${jwt.expiration}")
     private Long expiration;
@@ -59,35 +66,50 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
 
     @Value("${sfdc.url}")
     private String sfdcurl;
+
     @Value("${app_key}")
     private String app_key;
+
     @Value("${email.url}")
     private String url;
-    @Autowired
-    private SendEmail sendEmail;
 
+    /**
+     * 创建用户
+     * @param device  移动端/pc端
+     * @param type
+     * @param user
+     * @return
+     * @throws SQLException
+     * @throws Exception
+     */
     @Override
     @Transactional
     public ResponseEntity<?> createUser(Device device, String type, Mobile_User user) throws SQLException, Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/vnd.api+json");
-        sfdc_request.setEmail(user.getEmail());
-        sfdc_request.setName(user.getName());
-        sfdc_request.setFirstname(null);
-        sfdc_request.setLastname(user.getName());
-        sfdc_request.setPassword(user.getPassword());
-        sfdc_request.setStatus(user.getStatus());
-        System.out.println("+++" + sfdc_request);
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        sfdc_request = new Sfdc_Request(user.getName(),null,user.getName(),
+                user.getEmail(),user.getPassword(),user.getStatus());
         String json = JsonUtils.objectToJson(sfdc_request);
+        //调SFDC接口
         String jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUser" + app_key));
         JsonNode jsonNode = mapper.readTree(jsonData);
+        //若返回结果为true
         if (!jsonNode.get("success").asText().equals("true")) {
             throw new Exception();
         } else
             user.setSfdcId(jsonNode.get("user").get("sfid").asText());
         // user.setLatitude(BigDecimal.valueOf(jsonNode.get("user").get("address_longitude").doubleValue()));
         //user.setLatitude(BigDecimal.valueOf(jsonNode.get("user").get("address_latitude").doubleValue()));
+        jwtTokenUtil.setExpiration(expiration1);
+        String token = jwtTokenUtil.generateToken(user, device);
+        //发送email
+        sendEmail.sendEmail(url+"Bearer "+ token, user.getEmail(), user.getName());
+
         mobile_userMapper.insert(user);
+        //用户信息放入redis
+        operations.set(user.getEmail(),user);
+        operations.set(user.getSfdcId(),user);
+        //构建返回体
         responseData.setType(type);
         responseData.setId(user.getSfdcId());
         Map<String, String> attribute = new HashMap();
@@ -103,18 +125,34 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         responseBody.setData(responseData);
         responseBody.setIncluded(includedList);
         responseBody.setMeta(meta);
-        jwtTokenUtil.setExpiration(expiration1);
-        final String token = jwtTokenUtil.generateToken(user, device);
-        sendEmail.sendAttachmentsMail(user.getEmail(), url + "Bearer " + token);
+        jwtTokenUtil.setExpiration(expiration);
+         token = jwtTokenUtil.generateToken(user, device);
         headers.add("Authorization", "Bearer " + token);
         return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
     }
 
+    /**
+     * 获取当前用户信息
+     * @param token 会话信息
+     * @param user_id //SFDCid
+     * @return
+     * @throws SQLException
+     * @throws Exception
+     */
     public ResponseEntity<?> getCurrentUser(String token, String user_id) throws SQLException, Exception {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/vnd.api+json");
-        Mobile_User user = mobile_userMapper.getUserSfid(user_id);
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+        Mobile_User user = (Mobile_User) operations.get(user_id);
+        if (user == null) {
+            user = mobile_userMapper.getUserSfid(user_id);
+            operations.set("user_id", user);
+        }
         if (user != null) {
+            String email = jwtTokenUtil.getEmailFromToken(token.substring(7));
+            if(!user.getEmail().equals(email)){
+                ResultMsg  resultMsg =  ErrorResponseUtil.forbidend();
+                return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
+            }
             responseData.setType("users");
             responseData.setId(user.getSfdcId());
             Map<String, String> attribute = new HashMap();
@@ -133,38 +171,64 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             headers.add("Authorization", token);
             return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
         }
-       /* else if(!user.getEmail().equals(email)){
-            ResultMsg  resultMsg =  ErrorResponseUtil.forbidend();
-            return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
-        }*/
-        ResultMsg resultMsg = ErrorResponseUtil.notFound();
-        return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
-    }
+            ResultMsg resultMsg = ErrorResponseUtil.notFound();
+            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
+        }
 
+    /**
+     * 更新用户的信息，如果更新email 则需要发送email确认
+     * @param Authorization
+     * @param device
+     * @param user
+     * @return
+     * @throws SQLException
+     * @throws Exception
+     */
     @Override
     @Transactional
     public ResponseEntity<?> updateUser(String Authorization, Device device, Mobile_User user) throws SQLException, Exception {
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
         HttpHeaders headers = HttpHeader.HttpHeader();
         headers.add("Authorization", Authorization);
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
-        Mobile_User mobile_user = mobile_userMapper.getUserByEmail(email);
+        Mobile_User mobile_user =(Mobile_User)operations.get(email);
+        if(mobile_user==null){
+            mobile_user = mobile_userMapper.getUserSfid(email);
+        }
         if (!mobile_user.getSfdcId().equals(user.getSfdcId())) {
             ResultMsg resultMsg = ErrorResponseUtil.forbidend();
             return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
-        } else if (!email.equals(user.getEmail())) {
+        }
+        user.setCreatedate(mobile_user.getCreatedate());
+        if (!email.equals(user.getEmail())) {
             user.setStatus("unverified");
-            mobile_userMapper.updateByPrimaryKey(user);
-            jwtTokenUtil.setExpiration(expiration1);
-            final String token = jwtTokenUtil.generateToken(user, device);
-            sendEmail.sendAttachmentsMail(user.getEmail(), url + "Bearer " + token);
-            headers.add("Authorization", token);
+            sfdc_request = new Sfdc_Request(user.getName(),null,user.getName(),
+                    user.getEmail(),user.getPassword(),user.getStatus());
+            String json = JsonUtils.objectToJson(sfdc_request);
+            String jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUser" + app_key));
+            JsonNode jsonNode = mapper.readTree(jsonData);
+            if (jsonNode.get("success").asText().equals("true")){
+                jwtTokenUtil.setExpiration(expiration1);
+                 String token = jwtTokenUtil.generateToken(user, device);
+
+                sendEmail.sendEmail(url + "Bearer " + token,user.getEmail(),user.getName() );
+                mobile_userMapper.updateByPrimaryKey(user);
+                redisTemplate.delete(email);
+                redisTemplate.delete(user.getSfdcId());
+                jwtTokenUtil.setExpiration(expiration);
+                 token = jwtTokenUtil.generateToken(user, device);
+                headers.add("Authorization", "Bearer " + token);
+            }
+            else{
+                throw  new Exception();
+            }
         }
         responseData.setType("users");
         responseData.setId(user.getSfdcId());
         Map<String, String> attribute = new HashMap();
         attribute.put("name", user.getName());
         attribute.put("email", user.getEmail());
-        attribute.put("status", mobile_user.getStatus());
+        attribute.put("status", user.getStatus());
         responseData.setAttributes(attribute);
         Map<String, String> link = new HashMap<>();
         link.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/users/" + user.getSfdcId());
@@ -175,24 +239,34 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         responseBody.setData(responseData);
         responseBody.setIncluded(includedList);
         responseBody.setMeta(meta);
-
         return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
     }
 
+    /**
+     * 发送email将
+     * @param email
+     * @return
+     * @throws SQLException
+     * @throws Exception
+     */
     @Override
     @Transactional
     public boolean verified(String email) throws SQLException, Exception {
+        mobileUser=mobile_userMapper.getUserByEmail(email);
+        if(mobileUser.getStatus().equals("verified")){
+            return true;
+        }
         mobileUser.setStatus("verified");
         mobileUser.setEmail(email);
-        mobile_userMapper.verified(mobileUser);
-        mobileUser = mobile_userMapper.getUserByEmail(email);
-        sfdc_request = new Sfdc_Request(mobileUser.getName(),null,mobileUser.getName(),
-                mobileUser.getEmail(),mobileUser.getPassword(),mobileUser.getStatus());
+        sfdc_request = new Sfdc_Request(null,null,null,
+                mobileUser.getEmail(),null,mobileUser.getStatus());
         String json = JsonUtils.objectToJson(sfdc_request);
-        String jsonData = null;
-        jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUser" + app_key));
+        String jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUser" + app_key));
         JsonNode jsonNode = mapper.readTree(jsonData);
-        if (jsonNode.get("success").asText().equals("true")) {
+        if (jsonNode.get("success").asText().equals("true")){
+            mobile_userMapper.verified(mobileUser);
+            ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+            operations.set(email,mobileUser);
             return true;
         } else
             return false;
