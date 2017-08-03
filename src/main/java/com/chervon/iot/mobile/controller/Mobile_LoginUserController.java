@@ -17,8 +17,6 @@ import org.apache.commons.logging.LogFactory;
 import org.omg.CORBA.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,8 +51,7 @@ public class Mobile_LoginUserController {
     private  Long expiration;
     @Autowired
     private com.chervon.iot.mobile.model.entity.ResponseBody responseBody;
-    @Autowired
-    private RedisTemplate redisTemplate;
+
     /**
      * 登陆
      * @param Authorization
@@ -63,16 +60,15 @@ public class Mobile_LoginUserController {
      * @throws Exception
      */
     @RequestMapping(value = "/sessions",method= RequestMethod.POST)
-    public ResponseEntity<?> login(@RequestHeader String Authorization,Device device,@RequestBody String jsonData )throws Exception{
+    public ResponseEntity<?> login(@RequestHeader String Authorization,Device device )throws Exception{
         HttpHeaders headers= HttpHeader.HttpHeader();
+        headers.add("Content-Type","application/vnd.api+json");
         ResultStatusCode resultStatusCode = basicTokenUtil.checkAuthorizeToken(Authorization);
-         JsonNode jsonNode = mapper.readTree(jsonData);
-        String type = jsonNode.get("data").get("type").asText();
         if(resultStatusCode==ResultStatusCode.SC_OK){
             mobile_user=basicTokenUtil.getUser();
+            responseBody= mobile_userLoginService.loginReturn(mobile_user);
             jwtTokenUtil.setExpiration(expiration);
             final String token = jwtTokenUtil.generateToken(mobile_user, device);
-            responseBody= mobile_userLoginService.loginReturn(type,token,mobile_user);
             logger.info("checking authentication for ExpirationDateFromToken= " + jwtTokenUtil.getExpirationDateFromToken(token));
             headers.add("Authorization","Bearer "+token);
             return new ResponseEntity(responseBody,headers, HttpStatus.OK);
@@ -97,9 +93,10 @@ public class Mobile_LoginUserController {
     @GetMapping("/sessions")
     public  ResponseEntity<?> read(@RequestHeader String Authorization)throws SQLException,Exception{
         HttpHeaders headers=HttpHeader.HttpHeader();
+        headers.add("Content-Type","application/vnd.api+json");
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
         mobile_user = mobile_userLoginService.getUserByEmail(email);
-        responseBody= mobile_userLoginService.loginReturn("sessions",Authorization.substring(7),mobile_user);
+        responseBody= mobile_userLoginService.loginReturn(mobile_user);
         headers.add("Authorization",Authorization);
         return new ResponseEntity(responseBody,headers, HttpStatus.OK);
     }
@@ -114,8 +111,12 @@ public class Mobile_LoginUserController {
     @DeleteMapping("/sessions")
     public  ResponseEntity<?> delete(@RequestHeader String Authorization)throws SQLException,Exception{
         HttpHeaders headers=HttpHeader.HttpHeader();
+        headers.add("Content-Type","application/vnd.api+json");
+       //String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+       String authToken = Authorization.substring(7);
+        System.out.println(authToken);
         //通过jwt解析拿到email
-        String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+        String email = jwtTokenUtil.getEmailFromToken(authToken);
         mobile_user = mobile_userLoginService.getUserByEmail(email);
         mobile_user.setLastpasswordresetdate(new Date());
         mobile_userLoginService.modifyTime(mobile_user);
@@ -132,19 +133,18 @@ public class Mobile_LoginUserController {
      */
     @RequestMapping(value="/sessions/{session_id}/relationships/creator", method = RequestMethod.GET)
     public   ResponseEntity<?> relationship(@RequestHeader String Authorization,@PathVariable String session_id)throws SQLException,Exception {
-        HttpHeaders headers = HttpHeader.HttpHeader();
-        String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
-          Mobile_User mobile_user =  mobile_userLoginService.getUserByEmail(email);
-            Map<String,String> links = new HashMap<>();
-            Map<String,String> data = new HashMap<>();
-            links.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/sessions/"+session_id+"/relationships/creator");
-            links.put("related","https://private-b1af72-egoapi.apiary-mock.com/api/v1/sessions/"+session_id+"/creator");
-            data.put("type","users");
-            data.put("id",mobile_user.getSfdcId());
-            relationCreator.setLinks(links);
-            relationCreator.setData(data);
-            headers.add("Authorization",Authorization);
-            return new ResponseEntity(relationCreator,headers, HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+        Map<String,String> links = new HashMap<>();
+        Map<String,String> data = new HashMap<>();
+        links.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/sessions/"+session_id+"/relationships/creator");
+        links.put("related","https://private-b1af72-egoapi.apiary-mock.com/api/v1/sessions/"+session_id+"/creator");
+        data.put("type","users");
+        data.put("id",session_id);
+        relationCreator.setLinks(links);
+        relationCreator.setData(data);
+        headers.add("Authorization",Authorization);
+        return new ResponseEntity(relationCreator,headers, HttpStatus.OK);
 
     }
 }
