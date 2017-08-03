@@ -14,5 +14,5 @@ import java.sql.SQLException;
  */
 public interface  Mobile_UserForgetPasswordService {
     ResponseEntity<?> forgetPassword(String type, String email, Device device)throws SQLException,Exception;
-    ResponseEntity<?> resetPassword(String type,String id,Mobile_User mobile_user)throws SQLException,Exception;
+    ResponseEntity<?> resetPassword(Mobile_User mobile_user)throws SQLException,Exception;
 }

@@ -13,8 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +31,6 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     @Resource
     private AbleDeviceErrorsMapper ableDeviceErrorsMapper;
-    @Resource
-    private RedisTemplate redisTemplate;
 
     @Value("${ablecloud.url}")
     private String ableUrl;
@@ -42,18 +38,10 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     @Override
     @Transactional
     public Map createDeviceError(AbleDeviceErrors ableDeviceErrors) {
-        ValueOperations valueOperations = redisTemplate.opsForValue();
-        String key = ableDeviceErrors.getSn() + ableDeviceErrors.getRecoverable() + ableDeviceErrors.getDevice() + ableDeviceErrors.getFault();
-        Object deviceErrors = valueOperations.get(key);
         Map map = new HashMap();
-        map.put("code", "200");
-        if(deviceErrors == null){
-            ableDeviceErrorsMapper.insert(ableDeviceErrors);
-            valueOperations.set(key, "1");
-            map.put("msg", "This Device Error has existed ");
-            return map;
-        }
+        ableDeviceErrorsMapper.insert(ableDeviceErrors);
         map.put("msg", "success");
+        map.put("code", "200");
         return map;
     }
 
@@ -230,19 +218,5 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             responseData.put("meta", meta);
         }
         return new ResponseEntity<Object>(responseData,headers, HttpStatus.OK);
-    }
-
-    @Override
-    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault) {
-        ValueOperations valueOperations = redisTemplate.opsForValue();
-        String key = sn + recoverable + device + fault;
-        Object deviceErrors = valueOperations.get(key);
-        if(deviceErrors != null){
-            redisTemplate.delete(key);
-        }
-        Map map = new HashMap();
-        map.put("code", "200");
-        map.put("msg", "Ended This Device Error");
-        return map;
     }
 }

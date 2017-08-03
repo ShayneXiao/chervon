@@ -5,12 +5,9 @@ import com.chervon.iot.mobile.model.entity.Included;
 import com.chervon.iot.mobile.model.entity.Relationship;
 import com.chervon.iot.mobile.model.entity.ResponseBody;
 import com.chervon.iot.mobile.model.entity.ResponseData;
-import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
 import com.chervon.iot.common.util.GetUTCTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +19,7 @@ import java.util.*;
  */
 @Service
 public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
-
+    public Map<String,String> userMap =new HashMap<String,String>();
     @Autowired
     private Mobile_User mobileUser;
     @Autowired
@@ -37,37 +34,27 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
     private Included included;
     @Autowired
     private ResponseBody responseBody;
-    @Autowired
-    private RedisTemplate redisTemplate;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
 
     @Override
-    @Transactional
     public Mobile_User getUserByEmail(String email) throws SQLException {
-        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
-      Mobile_User  mobile_User = (Mobile_User) operations.get(email);
-      if(mobile_User==null){
-          mobileUser = mobile_userMapper.getUserByEmail(email);
-          if(mobile_User!=null){
-              operations.set(email,mobile_User);
-          }
-      }
+
+        mobileUser = mobile_userMapper.getUserByEmail(email);
+        System.out.println(mobileUser + "mobile");
         return  mobileUser;
     }
 
     @Override
-    public ResponseBody loginReturn(String type,String Authorization,Mobile_User mobile_user) {
-        responseData.setType(type);
+    public ResponseBody loginReturn(Mobile_User mobile_user) {
+        responseData.setType("session");
         responseData.setId(mobile_user.getSfdcId());
         Map<String,String> attributeMap = new HashMap<String,String>();
-        String utcTime =getUTime.getUTCTime(getUTime.getCurrentUTCTimeStr(jwtTokenUtil.getCreatedDateFromToken(Authorization.substring(7))),"yyyy-MM-dd'T'HH:mm:ssZ");;
+        String utcTime =getUTime.getUTCTime(getUTime.getCurrentUTCTimeStr(mobile_user.getCreatedate()),"yyyy-MM-dd'T'HH:mm:ssZ");;
         attributeMap.put("created_at",utcTime);
         responseData.setAttributes(attributeMap);
         Map<String,String> links = new HashMap<String, String>();
         Map<String,String> data = new HashMap<String, String>();
-        links.put("self", "https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/Bearer "+Authorization+"/relationships/creator");
-        links.put("related","https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/Bearer "+Authorization+"/creator");
+        links.put("self", "https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/"+mobile_user.getSfdcId()+"/relationships/creator");
+        links.put("related","https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/"+mobile_user.getSfdcId()+"/creator");
         data.put("type","users");
         data.put("id",mobile_user.getSfdcId());
         relationship.setLinks(links);
@@ -76,7 +63,7 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
         creator.put("creator",relationship);
         responseData.setRelationships(creator);
         Map<String,String> linkMap = new HashMap<String,String>();
-        linkMap.put("self","https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/Bearer "+Authorization);
+        linkMap.put("self","https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/"+mobile_user.getSfdcId());
         responseData.setLinks(linkMap);
         included.setType("users");
         included.setId(mobile_user.getSfdcId());
@@ -101,8 +88,5 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
     @Transactional
     public void modifyTime(Mobile_User mobile_user)throws SQLException {
       mobile_userMapper.updateModifyTime(mobile_user);
-      ValueOperations<String, Object> operations = redisTemplate.opsForValue();
-      operations.set(mobile_user.getEmail(),mobile_user);
-      operations.set(mobile_user.getSfdcId(),mobile_user);
     }
 }
