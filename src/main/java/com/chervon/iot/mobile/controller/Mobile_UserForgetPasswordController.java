@@ -54,9 +54,14 @@ public class Mobile_UserForgetPasswordController {
 
     @RequestMapping(value = "/resets", method= RequestMethod.POST)
     public ResponseEntity<?> createReset(@RequestBody String jsonData, Device device)throws SQLException,IOException,Exception{
+        HttpHeaders httpHeaders= HttpHeader.HttpHeader();
         JsonNode jsonNode = mapper.readTree(jsonData);
         String type = jsonNode.get("data").get("type").asText();
         String  email =jsonNode.get("data").get("attributes").get("email").asText();
+        if(email==null || email ==""){
+            ResultMsg  errResponse = ErrorResponseUtil.errorFiled();
+            return new ResponseEntity<Object>(errResponse,httpHeaders,HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         return mobile_userForgetPasswordService.forgetPassword(type, email,device);
     }
     //email链接接收转向
