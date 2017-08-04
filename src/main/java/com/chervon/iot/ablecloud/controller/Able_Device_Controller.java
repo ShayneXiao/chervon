@@ -66,6 +66,7 @@ public class Able_Device_Controller {
      */
     @RequestMapping(value = "/devices/{device_id}", method = RequestMethod.GET)
     public ResponseEntity<?> readDevice(@RequestHeader String Authorization, @PathVariable String device_id) throws Exception {
+        System.out.println("----------------进入read device----------------");
         Object responseBody = deviceService.selectDeviceByDeviceId(device_id);
 
         if (responseBody == null) {

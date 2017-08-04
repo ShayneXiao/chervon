@@ -483,6 +483,8 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
      */
     @Override
     public Object selectDeviceByDeviceId(String device_id) throws Exception {
+        System.out.println("----------------进入read device的service层实现类----------------");
+
         //从本地数据库获取数据
         Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
         if (device == null) {
