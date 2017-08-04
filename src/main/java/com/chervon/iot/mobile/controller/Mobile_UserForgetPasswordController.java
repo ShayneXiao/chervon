@@ -60,19 +60,19 @@ public class Mobile_UserForgetPasswordController {
         return mobile_userForgetPasswordService.forgetPassword(type, email,device);
     }
     //email链接接收转向
-    @GetMapping("/resets/{Authorization}")
-    public ModelAndView resetPassword(@PathVariable String Authorization)throws SQLException,Exception{
-        String email=jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+    @RequestMapping(value="/resets/{token}",method = RequestMethod.GET)
+    public ModelAndView resetPassword(@PathVariable String token)throws SQLException,Exception{
+        String email=jwtTokenUtil.getEmailFromToken(token.substring(7));
         ModelAndView mav = new ModelAndView();
         HttpHeaders httpHeaders = HttpHeader.HttpHeader();
-        httpHeaders.add("Authorization",Authorization);
+        httpHeaders.add("Authorization",token);
         if(email!=null){
             Mobile_User mobileuser=mobile_userLoginServiceImp.getUserByEmail(email);
             if(mobileuser!=null){
-                if(jwtTokenUtil.validateToken(Authorization.substring(7),mobile_user)==true){
+                if(jwtTokenUtil.validateToken(token.substring(7),mobile_user)==true){
                     Map<String,String> resets = new HashMap<>();
                     resets.put("type","resets");
-                    resets.put("id",Authorization);
+                    resets.put("id",token);
                     mav.addObject(resets);
                     mav.setViewName("resetPassword");
                     return mav;

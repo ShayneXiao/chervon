@@ -128,7 +128,6 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         //更新redis数据
         operations.set(mobile_user.getEmail(), mobile_user);
         operations.set(mobile_user.getSfdcId(), mobile_user);
-
         sfdc_request = new Sfdc_Request(mobile_user.getName(),null,mobile_user.getName(),
                 mobile_user.getEmail(),mobile_user.getPassword(),mobile_user.getStatus());
         String json = JsonUtils.objectToJson(sfdc_request);

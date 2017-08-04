@@ -269,6 +269,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             mobile_userMapper.verified(mobileUser);
             ValueOperations<String, Object> operations = redisTemplate.opsForValue();
             operations.set(email,mobileUser);
+            operations.set(mobileUser.getSfdcId(),mobileUser);
             return true;
         } else
             return false;
