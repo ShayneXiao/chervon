@@ -54,6 +54,18 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
         // TODO Auto-generated method stub
         logger.info("进入过滤器");
         HttpServletRequest httpServletRequest =(HttpServletRequest)request;
+        String headerAuthToken = httpServletRequest.getHeader("Authorization");
+        String authToken = "";
+        if(headerAuthToken==null){
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            httpResponse.setCharacterEncoding("UTF-8");
+            httpResponse.setContentType("application/vnd.api+json; charset=utf-8");
+            httpResponse.setStatus(ResultStatusCode.SC_PERMISSION_DENIED.getErrcode());
+            ObjectMapper mapper = new ObjectMapper();
+            ResultMsg  resultMsg =  ErrorResponseUtil.unauthorized();
+            httpResponse.getWriter().write(mapper.writeValueAsString(resultMsg));
+            return;
+        }
         //用户注册，登陆请求不做过滤
         if(httpServletRequest.getMethod().equals("POST")  && (httpServletRequest.getServletPath().equals("/api/v1/sessions")||httpServletRequest.getServletPath().equals("/api/v1/resets")||httpServletRequest.getServletPath().equals("/api/v1/users"))){
             chain.doFilter(request, response);
@@ -69,8 +81,7 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
             chain.doFilter(request, response);
             return;
         }
-        String headerAuthToken = httpServletRequest.getHeader("Authorization");
-        String authToken = "";
+
         //Authorization格式判断，格式不对，return
         if((headerAuthToken != null) && (headerAuthToken.length() > 7) && headerAuthToken.startsWith("Bearer ")){
             authToken = headerAuthToken.substring(7);

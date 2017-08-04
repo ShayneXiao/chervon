@@ -51,12 +51,12 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
         ValueOperations<String, Object> operations = redisTemplate.opsForValue();
         Mobile_User  mobile_User = (Mobile_User) operations.get(email);
         if(mobile_User==null){
-            mobileUser = mobile_userMapper.getUserByEmail(email);
+            mobile_User = mobile_userMapper.getUserByEmail(email);
             if(mobile_User!=null){
                 operations.set(email,mobile_User);
             }
         }
-        return  mobileUser;
+        return  mobile_User;
     }
 
     @Override
