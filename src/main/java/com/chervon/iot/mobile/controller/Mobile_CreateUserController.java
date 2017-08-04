@@ -83,14 +83,22 @@ public class Mobile_CreateUserController {
         JsonNode jsonNode = mapper.readTree(jsonData);
         String sf_id=jsonNode.get("data").get("id").asText();
         String password=jsonNode.get("data").get("attributes").get("password").asText();
+        String password_confrim=jsonNode.get("data").get("attributes").get("password_confirmation").asText();
+        if(password.equals(password_confrim)){
+            ResultMsg  resultMsg =  ErrorResponseUtil.errorFiled();
+            headers.add("Authorization",Authorization);
+            return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
+
+        }
         String email=jsonNode.get("data").get("attributes").get("email").asText();
         String name=jsonNode.get("data").get("attributes").get("name").asText();
+
         mobileUser.setPassword(password);
         mobileUser.setEmail(email);
         mobileUser.setEnabled(true);
         mobileUser.setName(name);
         mobileUser.setSfdcId(sf_id);
-        if(sf_id!=user_id){
+        if(sf_id.equals(user_id)){
             ResultMsg  resultMsg =  ErrorResponseUtil.errorFiled();
             headers.add("Authorization",Authorization);
             return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
