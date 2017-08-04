@@ -193,6 +193,14 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         HttpHeaders headers = HttpHeader.HttpHeader();
         headers.add("Authorization", Authorization);
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+        Mobile_User mob_User =(Mobile_User)operations.get(user.getEmail());
+        if(mob_User==null){
+            mob_User = mobile_userMapper.getUserByEmail(user.getEmail());
+        }
+        if (!email.equals(user.getEmail()) && mob_User!=null) {
+            ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
+            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
+        }
         Mobile_User mobile_user =(Mobile_User)operations.get(email);
         if(mobile_user==null){
             mobile_user = mobile_userMapper.getUserByEmail(email);
@@ -212,6 +220,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         user.setCreatedate(mobile_user.getCreatedate());
         user.setStatus(mobile_user.getStatus());
         if (!email.equals(user.getEmail())) {
+
             user.setStatus("unverified");
             sfdc_request = new Sfdc_Request(user.getName(),null,user.getName(),
                     user.getEmail(),user.getPassword(),user.getStatus());
@@ -221,7 +230,6 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             if (jsonNode.get("success").asText().equals("true")){
                 jwtTokenUtil.setExpiration(expiration1);
                 String token = jwtTokenUtil.generateToken(user, device);
-
                 sendEmail.sendEmail(url + "Bearer " + token,user.getEmail(),user.getName() );
                 mobile_userMapper.updateByPrimaryKey(user);
                 redisTemplate.delete(email);
