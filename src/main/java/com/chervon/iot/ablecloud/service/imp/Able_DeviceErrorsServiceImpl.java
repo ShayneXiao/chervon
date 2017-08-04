@@ -1,17 +1,22 @@
 package com.chervon.iot.ablecloud.service.imp;
 
 import com.chervon.iot.ablecloud.mapper.AbleDeviceErrorsMapper;
+import com.chervon.iot.ablecloud.mapper.Able_DeviceMapper;
 import com.chervon.iot.ablecloud.model.*;
 import com.chervon.iot.ablecloud.service.Able_DeviceErrorsService;
 import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.HttpUtils;
 import com.chervon.iot.common.util.GetUTCTime;
 import com.chervon.iot.common.util.HttpClientUtil;
+import com.chervon.iot.mobile.model.Mobile_User;
+import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.util.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -34,8 +39,12 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     @Resource
     private AbleDeviceErrorsMapper ableDeviceErrorsMapper;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
     @Resource
     private RedisTemplate redisTemplate;
+    @Resource
+    private Able_DeviceMapper able_deviceMapper;
 
     @Value("${ablecloud.url}")
     private String ableUrl;
@@ -162,13 +171,28 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     }
 
     @Override
-    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(Integer device_error_id) throws Exception {
+    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(String authorization, Integer device_error_id) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type","application/vnd.api+json");
 
         Map responseData = new HashMap();
         Able_ResponseDeviceError ableResponseDeviceError = ableDeviceErrorsMapper.getDeviceErrorByDeviceErrorID(device_error_id);
         if(ableResponseDeviceError != null){
+            authorization = authorization.substring(7);
+            String email = jwtTokenUtil.getEmailFromToken(authorization);
+            ValueOperations<String, Object> valueOperations =  redisTemplate.opsForValue();
+            Mobile_User mobileUser = (Mobile_User)valueOperations.get(email);
+            if(mobileUser != null){
+                if("unverified".equals(mobileUser.getStatus())){
+                    return this.falierResult(authorization);
+                }
+                Able_Device able_device= able_deviceMapper.selectByDeviceUserSfId(mobileUser.getSfdcId(), ableResponseDeviceError.getSn());
+                if(able_device == null){
+                    return this.falierResult(authorization);
+                }
+            }else{
+                throw new Exception();
+            }
             Map data = new HashMap(); Map attributes = new HashMap(); Map relationships = new HashMap();
             Map device = new HashMap(); Map links = new HashMap(); Map dataChild = new HashMap();
             data.put("type", "device_errors");
@@ -255,4 +279,21 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         map.put("msg", "Ended This Device Error");
         return map;
     }
+
+    private ResponseEntity<?> falierResult (String authorization){
+        Map data = new HashMap(); List list = new ArrayList(); Map map = new HashMap();;
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+        map.put("status", "403");
+        map.put("title", "You cannot perform this action.");
+        map.put("message", null);
+        Map source = new HashMap();
+        source.put("pointer", "");
+        map.put("source", source);
+        list.add(map);
+        data.put("errors", list);
+        headers.add("Authorization", authorization);
+        return new ResponseEntity<Object>(data,headers, HttpStatus.FORBIDDEN);
+    }
 }
+
