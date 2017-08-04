@@ -61,4 +61,6 @@ public interface Able_DeviceMapper {
      * @mbggenerated
      */
     int updateByPrimaryKey(Able_Device record);
+
+    Able_Device selectByDeviceUserSfId(String usersfid, String device_id);
 }
