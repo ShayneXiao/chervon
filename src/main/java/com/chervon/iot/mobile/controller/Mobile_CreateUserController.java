@@ -84,7 +84,7 @@ public class Mobile_CreateUserController {
         String sf_id=jsonNode.get("data").get("id").asText();
         String password=jsonNode.get("data").get("attributes").get("password").asText();
         String password_confrim=jsonNode.get("data").get("attributes").get("password_confirmation").asText();
-        if(password.equals(password_confrim)){
+        if(!password.equals(password_confrim)){
             ResultMsg  resultMsg =  ErrorResponseUtil.errorFiled();
             headers.add("Authorization",Authorization);
             return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
@@ -98,7 +98,7 @@ public class Mobile_CreateUserController {
         mobileUser.setEnabled(true);
         mobileUser.setName(name);
         mobileUser.setSfdcId(sf_id);
-        if(sf_id.equals(user_id)){
+        if(!sf_id.equals(user_id)){
             ResultMsg  resultMsg =  ErrorResponseUtil.errorFiled();
             headers.add("Authorization",Authorization);
             return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));

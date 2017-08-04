@@ -195,7 +195,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
         Mobile_User mobile_user =(Mobile_User)operations.get(email);
         if(mobile_user==null){
-            mobile_user = mobile_userMapper.getUserSfid(email);
+            mobile_user = mobile_userMapper.getUserByEmail(email);
         }
         Mobile_User mobUser = (Mobile_User) operations.get(user.getSfdcId());
         if(mobUser==null){
@@ -210,6 +210,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
         }
         user.setCreatedate(mobile_user.getCreatedate());
+        user.setStatus(mobile_user.getStatus());
         if (!email.equals(user.getEmail())) {
             user.setStatus("unverified");
             sfdc_request = new Sfdc_Request(user.getName(),null,user.getName(),
