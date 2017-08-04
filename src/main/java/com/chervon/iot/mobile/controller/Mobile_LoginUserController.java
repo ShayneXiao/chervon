@@ -51,6 +51,8 @@ public class Mobile_LoginUserController {
     private  RelationCreator relationCreator;
     @Value("${jwt.expiration}")
     private  Long expiration;
+    @Value("${relation_BaseLink}")
+    private String  egoBaseLink;
     @Autowired
     private com.chervon.iot.mobile.model.entity.ResponseBody responseBody;
     @Autowired
@@ -137,8 +139,8 @@ public class Mobile_LoginUserController {
         Mobile_User mobile_user =  mobile_userLoginService.getUserByEmail(email);
         Map<String,String> links = new HashMap<>();
         Map<String,String> data = new HashMap<>();
-        links.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/sessions/"+session_id+"/relationships/creator");
-        links.put("related","https://private-b1af72-egoapi.apiary-mock.com/api/v1/sessions/"+session_id+"/creator");
+        links.put("self",egoBaseLink+"sessions/"+session_id+"/relationships/creator");
+        links.put("related",egoBaseLink+"sessions/"+session_id+"/creator");
         data.put("type","users");
         data.put("id",mobile_user.getSfdcId());
         relationCreator.setLinks(links);

@@ -9,6 +9,7 @@ import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
 import com.chervon.iot.common.util.GetUTCTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,8 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
     private RedisTemplate redisTemplate;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    @Value("${relation_BaseLink}")
+    private String  egoBaseLink;
 
     @Override
     @Transactional
@@ -66,8 +69,8 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
         responseData.setAttributes(attributeMap);
         Map<String,String> links = new HashMap<String, String>();
         Map<String,String> data = new HashMap<String, String>();
-        links.put("self", "https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/Bearer "+Authorization+"/relationships/creator");
-        links.put("related","https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/Bearer "+Authorization+"/creator");
+        links.put("self", egoBaseLink+"sessions/Bearer "+Authorization+"/relationships/creator");
+        links.put("related",egoBaseLink+"sessions/Bearer "+Authorization+"/creator");
         data.put("type","users");
         data.put("id",mobile_user.getSfdcId());
         relationship.setLinks(links);
@@ -76,7 +79,7 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
         creator.put("creator",relationship);
         responseData.setRelationships(creator);
         Map<String,String> linkMap = new HashMap<String,String>();
-        linkMap.put("self","https://private-c0530-iyo.apiary-mock.com/api/v1/sessions/Bearer "+Authorization);
+        linkMap.put("self",egoBaseLink+"sessions/Bearer "+Authorization);
         responseData.setLinks(linkMap);
         included.setType("users");
         included.setId(mobile_user.getSfdcId());
@@ -86,7 +89,7 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
         includeAttribute.put("status", mobile_user.getStatus());
         included.setAttributes(includeAttribute);
         Map<String,String> includeLink = new HashMap<String,String>();
-        includeLink.put("self", "https://private-c0530-iyo.apiary-mock.com/api/v1/users/"+mobile_user.getSfdcId());
+        includeLink.put("self", egoBaseLink+"users/"+mobile_user.getSfdcId());
         included.setLinks(includeLink);
         List<Included> includedList = new ArrayList<Included>();
         includedList.add(included);
