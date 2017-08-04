@@ -39,6 +39,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
 
     @Value("${ablecloud.url}")
     private String ableUrl;
+    private @Value("${relation_BaseLink}") String relation_BaseLink;
 
     @Override
     @Transactional
@@ -78,8 +79,8 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             attributes.put("description", able_responseDeviceError.getDesc());
             map.put("attributes", attributes);
 
-            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_id + "/relationships/device");
-            links.put("related", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_id + "/device");
+            links.put("self", relation_BaseLink + "device_errors/" + device_id + "/relationships/device");
+            links.put("related", relation_BaseLink + "device_errors/" + device_id + "/device");
             device.put("links", links);
 
             data.put("type", "devices");
@@ -90,7 +91,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             map.put("relationships", relationships);
 
             links = new HashMap();
-            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + able_responseDeviceError.getId());
+            links.put("self", relation_BaseLink + "device_errors/" + able_responseDeviceError.getId());
             map.put("links", links);
             able_ResponseDeviceErrors.add(map);
         }
@@ -125,7 +126,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         //待定
         attributes.put("is_low_power", true);
         map.put("attributes", attributes);
-        links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_id);
+        links.put("self", relation_BaseLink + "devices/" + device_id);
         map.put("links", links);
         included.add(map);
 
@@ -136,20 +137,20 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
 
         links = new HashMap();
 
-        links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_id + "/device_errors");
-        links.put("first", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+ device_id +"/device_errors?page[number]=1&page[size]=" + pageSize);
+        links.put("self", relation_BaseLink + "devices/" + device_id + "/device_errors");
+        links.put("first", relation_BaseLink + "devices/"+ device_id +"/device_errors?page[number]=1&page[size]=" + pageSize);
         if(pageInfos.isHasPreviousPage()){
-            links.put("prev", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+ device_id +"/device_errors?page[number]="+ (pageNumber - 1)+"&page[size]=" + pageSize);
+            links.put("prev", relation_BaseLink + "devices/"+ device_id +"/device_errors?page[number]="+ (pageNumber - 1)+"&page[size]=" + pageSize);
         }else{
             links.put("prev", "null");
         }
         if(pageInfos.isHasNextPage()){
-            links.put("next", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+ device_id +"/device_errors?page[number]="+ (pageNumber + 1)+"&page[size]=" + pageSize);
+            links.put("next", relation_BaseLink + "devices/"+ device_id +"/device_errors?page[number]="+ (pageNumber + 1)+"&page[size]=" + pageSize);
         }else{
             links.put("next", "null");
         }
         if(pageInfos.getLastPage() > pageNumber){
-            links.put("last", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+ device_id +"/device_errors?page[number]="+ pageInfos.getLastPage()+"&page[size]=" + pageSize);
+            links.put("last", relation_BaseLink + "devices/"+ device_id +"/device_errors?page[number]="+ pageInfos.getLastPage()+"&page[size]=" + pageSize);
         }else{
             links.put("last","null");
         }
@@ -177,8 +178,8 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             attributes.put("description", ableResponseDeviceError.getDesc());
             data.put("attributes", attributes);
 
-            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_error_id + "/relationships/device");
-            links.put("related", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_error_id + "/device");
+            links.put("self", relation_BaseLink + "device_errors/" + device_error_id + "/relationships/device");
+            links.put("related", relation_BaseLink + "device_errors/" + device_error_id + "/device");
             dataChild.put("type", "devices");
             dataChild.put("id", device_error_id);
 
@@ -187,7 +188,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             relationships.put("device", device);
             data.put("relationships", relationships);
             Map linksChild = new HashMap();
-            linksChild.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/device_errors/" + device_error_id);
+            linksChild.put("self", relation_BaseLink + "device_errors/" + device_error_id);
             data.put("links", linksChild);
 
 
@@ -222,7 +223,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             attributesChild.put("is_low_power", true);
             dataChild.put("attributes", attributesChild);
             links = new HashMap();
-            links.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_error_id);
+            links.put("self", relation_BaseLink + "device_errors/" + device_error_id);
             dataChild.put("links", links);
             included.add(dataChild);
             Map meta = new HashMap();
