@@ -41,8 +41,6 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     private AbleDeviceErrorsMapper ableDeviceErrorsMapper;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private Mobile_User mobile_user;
     @Resource
     private RedisTemplate redisTemplate;
     @Resource
@@ -182,14 +180,13 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         if(ableResponseDeviceError != null){
             authorization = authorization.substring(7);
             String email = jwtTokenUtil.getEmailFromToken(authorization);
-            ValueOperations<String, String> valueOperations =  redisTemplate.opsForValue();
-            String mobileUser = valueOperations.get(email);
-            if(!StringUtils.isBlank(mobileUser)){
-                mobile_user = JsonUtils.jsonToPojo(mobileUser, Mobile_User.class);
-                if("unverified".equals(mobile_user.getStatus())){
+            ValueOperations<String, Object> valueOperations =  redisTemplate.opsForValue();
+            Mobile_User mobileUser = (Mobile_User)valueOperations.get(email);
+            if(mobileUser != null){
+                if("unverified".equals(mobileUser.getStatus())){
                     return this.falierResult(authorization);
                 }
-                Able_Device able_device= able_deviceMapper.selectByDeviceUserSfId(mobile_user.getSfdcId(), ableResponseDeviceError.getSn());
+                Able_Device able_device= able_deviceMapper.selectByDeviceUserSfId(mobileUser.getSfdcId(), ableResponseDeviceError.getSn());
                 if(able_device == null){
                     return this.falierResult(authorization);
                 }

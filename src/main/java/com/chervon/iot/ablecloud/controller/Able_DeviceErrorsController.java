@@ -36,8 +36,6 @@ public class Able_DeviceErrorsController {
     private Mobile_UserLoginService mobile_userLoginService;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private Mobile_User mobile_user;
     @Resource
     private RedisTemplate redisTemplate;
     @Resource
@@ -57,10 +55,9 @@ public class Able_DeviceErrorsController {
                                              @RequestParam("page[number]") Integer pageNumber, @RequestParam("page[size]") Integer pageSize) throws Exception {
         authorization = authorization.substring(7);
         String email = jwtTokenUtil.getEmailFromToken(authorization);
-        ValueOperations<String, String> valueOperations =  redisTemplate.opsForValue();
-        String jsonData = valueOperations.get(email);
-        if(!StringUtils.isBlank(jsonData)){
-            mobile_user = JsonUtils.jsonToPojo(jsonData, Mobile_User.class);
+        ValueOperations<String, Object> valueOperations =  redisTemplate.opsForValue();
+        Mobile_User mobile_user = (Mobile_User)valueOperations.get(email);
+        if(mobile_user != null){
             if("unverified".equals(mobile_user.getStatus())){
                 return this.falierResult(authorization);
             }
