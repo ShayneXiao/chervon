@@ -37,7 +37,7 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
     private Mobile_UserMapper userMapper;
     @Autowired
     private Able_DeviceMapper deviceMapper;
-    @Value("${ablecloud.url}")
+    @Value("${relation_BaseLink}")
     private String baseLink;
 
     /**

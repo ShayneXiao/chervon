@@ -42,7 +42,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     private CheckAndUpdateOTA checkAndUpdateOTA;
     @Autowired
     private CheckDeviceInfo checkDeviceInfo;
-    @Value("${ablecloud.url}")
+    @Value("${relation_BaseLink}")
     private String baseLink;
 
     /**
