@@ -121,7 +121,7 @@ public class Mobile_LoginUserController {
         mobile_user = mobile_userLoginService.getUserByEmail(email);
         mobile_user.setLastpasswordresetdate(new Date());
         mobile_userLoginService.modifyTime(mobile_user);
-        return new ResponseEntity(headers, HttpStatus.OK);
+        return new ResponseEntity(headers, HttpStatus.NO_CONTENT);
     }
 
     /**
