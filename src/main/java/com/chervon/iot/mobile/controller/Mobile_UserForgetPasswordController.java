@@ -86,7 +86,7 @@ public class Mobile_UserForgetPasswordController {
     }
     //
     @RequestMapping(value = "/resets" ,method=RequestMethod.PATCH)
-    public ResponseEntity<?> resetPassword(@RequestHeader String Authorization, @RequestBody String jsonData)throws SQLException,Exception {
+    public String resetPassword(@RequestHeader String Authorization, @RequestBody String jsonData)throws SQLException,Exception {
         JsonNode jsonNode = mapper.readTree(jsonData);
         mobile_user.setEmail(jwtTokenUtil.getEmailFromToken(Authorization.substring(7)));
         mobile_user.setPassword(jsonNode.get("data").get("attributes").get("password").asText());

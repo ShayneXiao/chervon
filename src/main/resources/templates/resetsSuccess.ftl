@@ -6,14 +6,14 @@
     <title>Successful</title>
     <link rel="stylesheet" type="text/css" href="/css/main.css">
     <!--[if lt IE 9]>
-  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 </head>
 <body>
 <div id="wrapper"><a class="logo" href="/"></a>
     <div id="main">
         <header id="header">
-            <h1><img src="/images/chervonIOT.png" width="128" height="128" /><span class="sub">verify successfully</span></h1>
+            <h1><img src="/images/chervonIOT.png" width="128" height="128" /><span class="sub">Reset password successfully</span></h1>
         </header>
         <div id="content">
             <h2>Please go to the App login ！</h2>

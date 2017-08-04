@@ -120,7 +120,7 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
      */
     @Override
     @Transactional
-    public ResponseEntity<?> resetPassword(String type,String id,Mobile_User mobile_user) throws SQLException, Exception {
+    public String resetPassword(String type,String id,Mobile_User mobile_user) throws SQLException, Exception {
         HttpHeaders headers = HttpHeader.HttpHeader();
         ValueOperations<String, Object> operations = redisTemplate.opsForValue();
         mobile_userMapper.resetPassword(mobile_user);
@@ -137,11 +137,13 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         JsonNode jsonNode = mapper.readTree(jsonData);
         //如果成功
         if (jsonNode.get("success").asText().equals("true")) {
-            ResponseBody responseBody = mobile_userLoginService.loginReturn(type,id,mobile_user);
+           /* ResponseBody responseBody = mobile_userLoginService.loginReturn(type,id,mobile_user);
             headers.add("Authorization","Bearer "+id);
-            return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
+            return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);*/
+           return "resetsSuccess";
         }
-        ResultMsg resultMsg = ErrorResponseUtil.serverError();
-        return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.INTERNAL_SERVER_ERROR.getErrcode()));
+       /* ResultMsg resultMsg = ErrorResponseUtil.serverError();
+        return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.INTERNAL_SERVER_ERROR.getErrcode()));*/
+        return "resetsFailure";
     }
 }
