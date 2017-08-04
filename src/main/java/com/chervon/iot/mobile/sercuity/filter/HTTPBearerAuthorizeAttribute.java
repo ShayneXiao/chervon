@@ -64,8 +64,8 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
             chain.doFilter(request, response);
             return;
         }
-        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/devices/createDeviceError")
-                || servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/devices/endedDeviceError")){
+        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.contains("/api/v1/devices/createDeviceError")
+                || servletPath.contains("/api/v1/devices/endedDeviceError")){
             chain.doFilter(request, response);
             return;
         }
