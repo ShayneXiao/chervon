@@ -1,5 +1,6 @@
 package com.chervon.iot.common.exception.exceptionHandle;
 
+import com.chervon.iot.common.exception.Bad_RequestException;
 import com.chervon.iot.common.exception.ErrorInfo;
 import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
@@ -46,5 +47,15 @@ public class GlobalExceptionHandler {
         ResultMsg  resultMsg =  ErrorResponseUtil.serverError();
         return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.INTERNAL_SERVER_ERROR.getErrcode()));
 
+    }
+
+    @ExceptionHandler(value = Bad_RequestException.class)
+    @ResponseBody
+    public ResponseEntity<?> Bad_RequestException(Bad_RequestException e){
+        e.printStackTrace();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+        ResultMsg  resultMsg =  ErrorResponseUtil.errorFiled();
+        return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
     }
 }
