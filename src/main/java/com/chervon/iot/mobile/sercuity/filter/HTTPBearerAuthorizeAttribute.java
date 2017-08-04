@@ -56,7 +56,23 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
         HttpServletRequest httpServletRequest =(HttpServletRequest)request;
         String headerAuthToken = httpServletRequest.getHeader("Authorization");
         String authToken = "";
-        if(headerAuthToken==null){
+
+        //用户注册，登陆请求不做过滤
+        if(httpServletRequest.getMethod().equals("POST")  && (httpServletRequest.getServletPath().equals("/api/v1/sessions")||httpServletRequest.getServletPath().equals("/api/v1/resets")||httpServletRequest.getServletPath().equals("/api/v1/users"))){
+            chain.doFilter(request, response);
+            return;
+        }
+        String servletPath = httpServletRequest.getServletPath();
+        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/resets") && (httpServletRequest.getMethod().equals("GET") )){
+            chain.doFilter(request, response);
+            return;
+        }
+        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.contains("/api/v1/devices/createDeviceError")
+                || servletPath.contains("/api/v1/devices/endedDeviceError")){
+            chain.doFilter(request, response);
+            return;
+        }
+         if(headerAuthToken==null){
             HttpServletResponse httpResponse = (HttpServletResponse) response;
             httpResponse.setCharacterEncoding("UTF-8");
             httpResponse.setContentType("application/vnd.api+json; charset=utf-8");
@@ -66,22 +82,6 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
             httpResponse.getWriter().write(mapper.writeValueAsString(resultMsg));
             return;
         }
-        //用户注册，登陆请求不做过滤
-        if(httpServletRequest.getMethod().equals("POST")  && (httpServletRequest.getServletPath().equals("/api/v1/sessions")||httpServletRequest.getServletPath().equals("/api/v1/resets")||httpServletRequest.getServletPath().equals("/api/v1/users"))){
-            chain.doFilter(request, response);
-            return;
-        }
-        String servletPath = httpServletRequest.getServletPath();
-        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/resets") && httpServletRequest.getMethod().equals("GET")){
-            chain.doFilter(request, response);
-            return;
-        }
-        if(servletPath.substring(0,servletPath.lastIndexOf("/")).equals("/api/v1/users/aa") || servletPath.contains("/api/v1/devices/createDeviceError")
-                || servletPath.contains("/api/v1/devices/endedDeviceError")){
-            chain.doFilter(request, response);
-            return;
-        }
-
         //Authorization格式判断，格式不对，return
         if((headerAuthToken != null) && (headerAuthToken.length() > 7) && headerAuthToken.startsWith("Bearer ")){
             authToken = headerAuthToken.substring(7);

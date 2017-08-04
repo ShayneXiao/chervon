@@ -1,13 +1,20 @@
 package com.chervon.iot.ablecloud.service.imp;
 
 import com.chervon.iot.ablecloud.mapper.Able_BatteryMapper;
+import com.chervon.iot.ablecloud.mapper.Able_DeviceMapper;
 import com.chervon.iot.ablecloud.model.*;
 import com.chervon.iot.ablecloud.service.Able_BatterySlots_Service;
 import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.HttpUtils;
 import com.chervon.iot.common.common_util.HttpHeader;
+import com.chervon.iot.common.exception.ResultMsg;
+import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.common.util.GetUTCTime;
 import com.chervon.iot.common.util.HttpClientUtil;
+import com.chervon.iot.mobile.model.Mobile_User;
+import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.service.imp.Mobile_UserLoginServiceImp;
+import com.chervon.iot.mobile.util.ErrorResponseUtil;
 import com.chervon.iot.mobile.util.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +22,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +41,30 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     private static final ObjectMapper mapper = new ObjectMapper();
     @Autowired
     private Able_BatteryMapper able_batteryMapper;
+    @Autowired
+    private Able_DeviceMapper able_deviceMapper;
     @Value("${ablecloud.url}")
     private String ableUrl;
     @Value("${relation_BaseLink}")
     private String  egoBaseLink;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private Mobile_UserLoginServiceImp mobile_userLoginServiceImp;
     //一个设备下所有的电池包
     @Transactional
     @Override
     public ResponseEntity<?> batterySlots(String Authorization,String device_id,int pageNumber,int pageSize)throws IOException,Exception {
+        Able_Device able_device = able_deviceMapper.selectByPrimaryKey(device_id);
+        String email =jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+       Mobile_User mobile_user= mobile_userLoginServiceImp.getUserByEmail(email);
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        headers.add("Authorization",Authorization);
+        if(!mobile_user.getSfdcId().equals(able_device.getUsersfid())){
+            ResultMsg resultMsg = ErrorResponseUtil.forbidend();
+            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
+
+        }
         PageHelper.startPage(pageNumber, pageSize);
         List<Able_Battery> batteryList = able_batteryMapper.selectListBattery(device_id);
         PageInfo<Able_Battery> pageInfo = new PageInfo<Able_Battery>(batteryList);
@@ -144,8 +169,6 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         List<Able_ResponseBatteryIncluded> able_responseBatteryIncludedList =new ArrayList<>();
         able_responseBatteryIncludedList.add(able_responseBatteryIncluded);
         Able_ResponseListBody able_responseBattery = new Able_ResponseListBody(able_responseBatteryDataList,able_responseBatteryIncludedList,new HashMap<>(),resPagationLink);
-        HttpHeaders headers = HttpHeader.HttpHeader();
-        headers.add("Authorization",Authorization);
         return new ResponseEntity<Object>(able_responseBattery,headers, HttpStatus.OK);
     }
     //关联
@@ -159,7 +182,19 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     @Transactional
     @Override
     public ResponseEntity<?> batterySlot(String Authorization,String battery_slot_id)throws Exception {
-        Able_Battery able_battery = able_batteryMapper.selectDeviceId(battery_slot_id);
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        headers.add("Authorization",Authorization);
+        Able_Battery able_battery =able_batteryMapper.selectDeviceId(battery_slot_id);
+        if(able_battery!=null){
+            Able_Device able_device = able_deviceMapper.selectByPrimaryKey(able_battery.getDevice_id());
+            String email =jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+            Mobile_User mobile_user= mobile_userLoginServiceImp.getUserByEmail(email);
+            if(!mobile_user.getSfdcId().equals(able_device.getUsersfid())){
+                ResultMsg resultMsg = ErrorResponseUtil.forbidend();
+                return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
+
+            }
+        }
         String method ="getData";
         GetUTCTime getUTCTime = new GetUTCTime();
         long timesStamp = getUTCTime.getCurrentUTCTimeStr(new Date());
@@ -221,8 +256,6 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         links.put("self",egoBaseLink+"battery_slots/"+able_battery.getBattery_id());
         able_responseBatteryData.setLinks(links);
         Able_ResponseBody able_responseBattery = new Able_ResponseBody(able_responseBatteryData,new ArrayList<>(),new HashMap<>());
-        HttpHeaders headers = HttpHeader.HttpHeader();
-        headers.add("Authorization",Authorization);
         return new ResponseEntity<Object>(able_responseBattery,headers, HttpStatus.OK);
     }
 }

@@ -51,7 +51,7 @@
        #{status,jdbcType=VARCHAR})
   </insert>
 
-  <update id="updateBySfdcId" parameterType="com.chervon.iot.mobile.model.Mobile_User">
+  <update id="updateByPrimaryKey" parameterType="com.chervon.iot.mobile.model.Mobile_User">
 
     update mobile_user
     <set >
