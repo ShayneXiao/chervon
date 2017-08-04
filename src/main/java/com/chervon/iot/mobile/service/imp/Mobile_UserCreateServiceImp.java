@@ -197,6 +197,14 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         if(mobile_user==null){
             mobile_user = mobile_userMapper.getUserSfid(email);
         }
+        Mobile_User mobUser = (Mobile_User) operations.get(user.getSfdcId());
+        if(mobUser==null){
+            mobUser=mobile_userMapper.getUserSfid(user.getSfdcId());
+            if(mobUser==null){
+                ResultMsg resultMsg = ErrorResponseUtil.notFound();
+                return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
+            }
+        }
         if (!mobile_user.getSfdcId().equals(user.getSfdcId())) {
             ResultMsg resultMsg = ErrorResponseUtil.forbidend();
             return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
