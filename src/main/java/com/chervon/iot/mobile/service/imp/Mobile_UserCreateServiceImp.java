@@ -72,6 +72,8 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
 
     @Value("${email.url}")
     private String url;
+    @Value("${relation_BaseLink}")
+    private String  egoBaseLink;
 
     /**
      * 创建用户
@@ -118,7 +120,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         attribute.put("status", user.getStatus());
         responseData.setAttributes(attribute);
         Map<String, String> link = new HashMap<>();
-        link.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/users/" + user.getSfdcId());
+        link.put("self", egoBaseLink+"users/" + user.getSfdcId());
         responseData.setLinks(link);
         List<Included> includedList = new ArrayList();
         Map<String, String> meta = new HashMap();
@@ -161,7 +163,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             attribute.put("status", user.getStatus());
             responseData.setAttributes(attribute);
             Map<String, String> link = new HashMap<>();
-            link.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/users/" + user.getSfdcId());
+            link.put("self", egoBaseLink+"users/" + user.getSfdcId());
             responseData.setLinks(link);
             List<Included> includedList = new ArrayList();
             Map<String, String> meta = new HashMap();
@@ -231,7 +233,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         attribute.put("status", user.getStatus());
         responseData.setAttributes(attribute);
         Map<String, String> link = new HashMap<>();
-        link.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/users/" + user.getSfdcId());
+        link.put("self", egoBaseLink+"users/" + user.getSfdcId());
         responseData.setLinks(link);
         responseData.setRelationships(new HashMap<>());
         List<Included> includedList = new ArrayList();

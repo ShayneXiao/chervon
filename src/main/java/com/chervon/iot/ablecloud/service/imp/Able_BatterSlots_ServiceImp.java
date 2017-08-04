@@ -34,6 +34,8 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     private Able_BatteryMapper able_batteryMapper;
     @Value("${ablecloud.url}")
     private String ableUrl;
+    @Value("${relation_BaseLink}")
+    private String  egoBaseLink;
     //一个设备下所有的电池包
     @Transactional
     @Override
@@ -42,23 +44,23 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         List<Able_Battery> batteryList = able_batteryMapper.selectListBattery(device_id);
         PageInfo<Able_Battery> pageInfo = new PageInfo<Able_Battery>(batteryList);
         Map<String,String> resPagationLink = new HashMap<>();
-        resPagationLink.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+device_id+"/battery_slots?");
-        resPagationLink.put("first","https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+device_id+"/battery_slots?page[number]="+pageInfo.getFirstPage()+"&page[size]="+pageSize);
+        resPagationLink.put("self",egoBaseLink+"devices/"+device_id+"/battery_slots?");
+        resPagationLink.put("first",egoBaseLink+"devices/"+device_id+"/battery_slots?page[number]="+pageInfo.getFirstPage()+"&page[size]="+pageSize);
         if(!pageInfo.isHasPreviousPage()){
             resPagationLink.put("prev",null);
         }
         else {
-            resPagationLink.put("prev","https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+device_id+"/battery_slots?page[number]="+(pageNumber-1)+"&page[size]="+pageSize);
+            resPagationLink.put("prev",egoBaseLink+"devices/"+device_id+"/battery_slots?page[number]="+(pageNumber-1)+"&page[size]="+pageSize);
         }
         if(!pageInfo.isHasNextPage()) {
             resPagationLink.put("next", null);
         } else {
-            resPagationLink.put("next", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_id + "/battery_slots?page[number]=" + (pageNumber + 1) + "&page[size]=" + pageSize);
+            resPagationLink.put("next", egoBaseLink+"devices/" + device_id + "/battery_slots?page[number]=" + (pageNumber + 1) + "&page[size]=" + pageSize);
         }
         if(pageInfo.getLastPage() <= pageNumber){
             resPagationLink.put("last",null);
         } else {
-            resPagationLink.put("last", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/" + device_id + "/battery_slots?page[number]=" + pageInfo.getLastPage() + "&page[size]=" + pageSize);
+            resPagationLink.put("last", egoBaseLink+"devices/" + device_id + "/battery_slots?page[number]=" + pageInfo.getLastPage() + "&page[size]=" + pageSize);
         }
         String method ="getData";
         GetUTCTime getUTCTime = new GetUTCTime();
@@ -108,15 +110,15 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
                         attributes.put("is_low_power", "false");
                     }
                     able_responseBatteryData.setAttribute(attributes);
-                    devicelinks.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/battery_slots/"+battery.getBattery_id()+"/relationships/device");
-                    devicelinks.put( "related", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/battery_slots/"+device_id+"/device");
+                    devicelinks.put("self", egoBaseLink+"battery_slots/"+battery.getBattery_id()+"/relationships/device");
+                    devicelinks.put( "related", egoBaseLink+"battery_slots/"+device_id+"/device");
                     data.put("type","device");
                     data.put("id",device_id);
                     device.put("links",devicelinks);
                     device.put("data",data);
                     relationships.put("device",device);
                     able_responseBatteryData.setRelationships(relationships);
-                    links.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/battery_slots/"+battery.getBattery_id());
+                    links.put("self",egoBaseLink+"battery_slots/"+battery.getBattery_id());
                     able_responseBatteryData.setLinks(links);
                     able_responseBatteryDataList.add(able_responseBatteryData);
 
@@ -137,7 +139,7 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         //
         attributes1.put("is_low_power", "true");
         Map<String,String>  includLink = new HashMap<>();
-        includLink.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/devices/"+device_id);
+        includLink.put("self",egoBaseLink+"devices/"+device_id);
         Able_ResponseBatteryIncluded able_responseBatteryIncluded= new Able_ResponseBatteryIncluded("device",device_id,attributes1,includLink);
         List<Able_ResponseBatteryIncluded> able_responseBatteryIncludedList =new ArrayList<>();
         able_responseBatteryIncludedList.add(able_responseBatteryIncluded);
@@ -208,15 +210,15 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
             attributes.put("is_low_power", "false");
         }
         able_responseBatteryData.setAttribute(attributes);
-        devicelinks.put("self", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/battery_slots/"+able_battery.getBattery_id()+"/relationships/device");
-        devicelinks.put( "related", "https://private-b1af72-egoapi.apiary-mock.com/api/v1/battery_slots/"+able_battery+"/device");
+        devicelinks.put("self", egoBaseLink+"battery_slots/"+able_battery.getBattery_id()+"/relationships/device");
+        devicelinks.put( "related", egoBaseLink+"battery_slots/"+able_battery+"/device");
         data.put("type","device");
         data.put("id",able_battery.getDevice_id());
         device.put("links",devicelinks);
         device.put("data",data);
         relationships.put("device",device);
         able_responseBatteryData.setRelationships(relationships);
-        links.put("self","https://private-b1af72-egoapi.apiary-mock.com/api/v1/battery_slots/"+able_battery.getBattery_id());
+        links.put("self",egoBaseLink+"battery_slots/"+able_battery.getBattery_id());
         able_responseBatteryData.setLinks(links);
         Able_ResponseBody able_responseBattery = new Able_ResponseBody(able_responseBatteryData,new ArrayList<>(),new HashMap<>());
         HttpHeaders headers = HttpHeader.HttpHeader();

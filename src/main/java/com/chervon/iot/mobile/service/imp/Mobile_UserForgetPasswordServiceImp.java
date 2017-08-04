@@ -68,7 +68,8 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
     private String app_key;
     @Value("${jwt.expirationhours}")
     private Long expirationhours;
-
+    @Value("${relation_BaseLink}")
+    private String  egoBaseLink;
     @Autowired
     private RedisTemplate redisTemplate;
     /**
@@ -96,7 +97,7 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
             responData.setAttributes(attribute);
             responData.setRelationships(new HashMap<>());
             Map<String, String> link = new HashMap<>();
-            link.put("self", "http://private-b1af72-egoapi.apiary-mock.com/api/v1/resets/Bearer "+token);
+            link.put("self", egoBaseLink+"resets/Bearer "+token);
             responData.setLinks(link);
             List<Included> includedList = new ArrayList<>();
             responseBody.setIncluded(includedList);
