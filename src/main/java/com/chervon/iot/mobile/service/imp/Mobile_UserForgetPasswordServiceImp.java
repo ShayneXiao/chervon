@@ -88,7 +88,7 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         jwtTokenUtil.setExpiration(expirationhours);
         if (mobile_user != null) {
             final String token = jwtTokenUtil.generateToken(mobile_user, device);
-            String url = emailUrl + "Bearer " + token+"/email";
+            String url = emailUrl + "resets/Bearer " + token+"/email";
             sendEmail.sendEmail(url,email,mobile_user.getName());
             responData.setType(type);
             responData.setId("Bearer "+token);
@@ -132,7 +132,7 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
                 mobile_user.getEmail(),mobile_user.getPassword(),mobile_user.getStatus());
         String json = JsonUtils.objectToJson(sfdc_request);
         //调SFDC接口
-        String jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUser" + app_key));
+        String jsonData = HttpClientUtil.doPostJson(sfdcurl, json, "CreateUser", MyUtils.getMD5("CreateUse" + app_key));
         JsonNode jsonNode = mapper.readTree(jsonData);
         //如果成功
         if (jsonNode.get("success").asText().equals("true")) {

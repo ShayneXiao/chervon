@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mobile.device.Device;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import com.chervon.iot.mobile.model.entity.ResponseBody;
@@ -37,7 +38,7 @@ import java.util.Map;
 /**
  * Created by Boy on 2017/6/26.
  */
-@RestController
+@Controller
 @RequestMapping("/api/v1")
 public class Mobile_UserForgetPasswordController {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -74,11 +75,12 @@ public class Mobile_UserForgetPasswordController {
         if(email!=null){
             Mobile_User mobileuser=mobile_userLoginServiceImp.getUserByEmail(email);
             if(mobileuser!=null){
-                if(jwtTokenUtil.validateToken(token.substring(7),mobile_user)==true){
+                if(jwtTokenUtil.validateToken(token.substring(7),mobileuser)==true){
                     Map<String,String> resets = new HashMap<>();
                     resets.put("type","resets");
                     resets.put("id",token);
-                    mav.addObject(resets);
+                    resets.put("Authorization",token);
+                    mav.addObject("resets",resets);
                     mav.setViewName("resetPassword");
                     return mav;
                 }
@@ -86,12 +88,13 @@ public class Mobile_UserForgetPasswordController {
                 return mav;
             }
         }
-        mav.setViewName("ServerError");
+        mav.setViewName("AuthorizationDefeat");
         return mav;
     }
     //
     @RequestMapping(value = "/resets" ,method=RequestMethod.PATCH)
     public String resetPassword(@RequestHeader String Authorization, @RequestBody String jsonData)throws SQLException,Exception {
+
         JsonNode jsonNode = mapper.readTree(jsonData);
         mobile_user.setEmail(jwtTokenUtil.getEmailFromToken(Authorization.substring(7)));
         mobile_user.setPassword(jsonNode.get("data").get("attributes").get("password").asText());

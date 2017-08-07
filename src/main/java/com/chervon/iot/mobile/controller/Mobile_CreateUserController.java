@@ -108,12 +108,15 @@ public class Mobile_CreateUserController {
     //邮箱email链接验证
     @RequestMapping(value = "/users/{Authorization}/email" ,method= RequestMethod.GET)
     public String updateUser(@PathVariable String Authorization)throws SQLException,Exception {
+
         HttpHeaders headers = HttpHeader.HttpHeader();
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
-        boolean flag =mobile_userCreateService.verified(email);
-        if (flag==true){
-            return  "success";
+        if(email!=null){
+            boolean flag =mobile_userCreateService.verified(email);
+            if (flag==true){
+                return  "success";
+            }
         }
-        return  "error";
+        return  "AuthoirzationDefeat";
     }
 }

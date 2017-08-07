@@ -1,0 +1,44 @@
+
+			#header{
+				position: fixed;
+    			top: 0;
+    			left: 0;
+    			width: 100%;
+    			z-index: 15;
+    			height: 105px;
+			    background: #ededed;
+			    background: -moz-linear-gradient(top, #ededed 0%, #d3d3d3 100%);
+			    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ededed), color-stop(100%,#d3d3d3));
+			    background: -webkit-linear-gradient(top, #ededed 0%,#d3d3d3 100%);
+			    background: -o-linear-gradient(top, #ededed 0%,#d3d3d3 100%);
+			    background: -ms-linear-gradient(top, #ededed 0%,#d3d3d3 100%);
+			    background: linear-gradient(to bottom, #ededed 0%,#d3d3d3 100%);
+			}
+			#logo{
+				width: 80%;
+				height: 100px;
+				padding-left: 200px;
+				padding-top: 40px;
+			}
+			#whitespace{
+				width: 100%;
+				padding-top: 150px;
+			}
+			#customer{
+				margin: 0 auto;
+				width: 70%;
+			}
+			#customer input[type="password_confirmation"],
+			#customer input[type="password"] {
+				width: 100%;
+			}
+			#customer input.action_button {
+				padding: 7px 20px;
+			}
+			.six.columns{
+				width: 340px;
+			}
+			.header-green { color: #76bd1d; }
+			.clearfix.large_form{
+				margin-bottom: 30px;
+			}

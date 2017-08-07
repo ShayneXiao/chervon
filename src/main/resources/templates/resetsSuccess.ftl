@@ -10,10 +10,10 @@
     <![endif]-->
 </head>
 <body>
-<div id="wrapper"><a class="logo" href="/"></a>
+<div id="wrapper">
     <div id="main">
         <header id="header">
-            <h1><img src="/images/chervonIOT.png" width="128" height="128" /><span class="sub">Reset password successfully</span></h1>
+            <h1><img src="/images/chervonIOT.png" width="128" height="100" /><span class="sub">Reset password successfully</span></h1>
         </header>
         <div id="content">
             <h2>Please go to the App login ！</h2>

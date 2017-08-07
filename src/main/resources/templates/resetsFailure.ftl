@@ -9,10 +9,10 @@
     <![endif]-->
 </head>
 <body>
-<div id="wrapper"><a class="logo" href="/"></a>
+<div id="wrapper">
     <div id="main">
         <header id="header">
-            <h1><img src="/images/chervonIOT.png" width="128" height="128"><span class="sub">Reset password failed，Please try again!</span></h1>
+            <h1><img src="/images/chervonIOT.png" width="128" height="100"><span class="sub">Reset password failed，Please try again!</span></h1>
         </header>
         <div id="content">
             <h2> Please try again！</h2>

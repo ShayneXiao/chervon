@@ -116,7 +116,7 @@ body {
 }
 .logo {
     position: absolute;
-    background: url(logo.png);
+    background: url(/img/logo.png);
     width: 200px;
     height: 80px;
     top: 1%;
