@@ -49,7 +49,6 @@ public class Mobile_UserLoginServiceImp implements Mobile_UserLoginService {
     @Transactional
     public Mobile_User getUserByEmail(String email) throws SQLException {
         ValueOperations<String, Object> operations = redisTemplate.opsForValue();
-        redisTemplate.delete(email);
         Mobile_User  mobile_User = (Mobile_User) operations.get(email);
         if(mobile_User==null){
             mobile_User = mobile_userMapper.getUserByEmail(email);
