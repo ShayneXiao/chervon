@@ -263,8 +263,9 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         String key = sn + recoverable + device + fault;
         String deviceErrors = valueOperations.get(key);
         if(deviceErrors != null){
-            redisTemplate.delete(key);
-
+            if("closed".equals(status) || "pendding".equals(status)){
+                redisTemplate.delete(key);
+            }
             AbleDeviceErrors ableDeviceErrors = JsonUtils.jsonToPojo(deviceErrors.toString(), AbleDeviceErrors.class);
             ableDeviceErrors.setStatus(status);
             AbleDeviceErrorsExample ableDeviceErrorsExample = new AbleDeviceErrorsExample();
