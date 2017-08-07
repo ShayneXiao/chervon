@@ -1,6 +1,10 @@
 package com.chervon.iot.common.util;
 
 
+import com.chervon.iot.common.exception.Bad_RequestException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -32,6 +36,7 @@ import java.util.Map;
  * Created by Lynn on 2017/4/13.
  */
 public class HttpClientUtil {
+	private static final ObjectMapper mapper = new ObjectMapper();
 	public static CloseableHttpClient createSSLClientDefault(){
 		try {
 			SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
@@ -169,8 +174,12 @@ public class HttpClientUtil {
 			// 执行http请求
 			response = httpClient.execute(httpPost);
 			resultString = EntityUtils.toString(response.getEntity(), "utf-8");
-		}catch (Exception e){
-			throw  new Exception();
+			JsonNode result = mapper.readTree(resultString);
+			if(!StringUtils.isBlank(result.get("error").asText())){
+				throw new Bad_RequestException();
+			}
+		} catch (Exception e){
+			throw e;
 		}
 		finally {
 			response.close();
