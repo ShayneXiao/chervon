@@ -56,7 +56,7 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
         HttpServletRequest httpServletRequest =(HttpServletRequest)request;
         String headerAuthToken = httpServletRequest.getHeader("Authorization");
         String authToken = "";
-
+        System.out.println(request.getParameter("data") + " data");
         //用户注册，登陆请求不做过滤
         if(httpServletRequest.getMethod().equals("POST")  && (httpServletRequest.getServletPath().equals("/api/v1/sessions")||httpServletRequest.getServletPath().equals("/api/v1/resets")||httpServletRequest.getServletPath().equals("/api/v1/users"))){
             chain.doFilter(request, response);
@@ -72,6 +72,11 @@ public class HTTPBearerAuthorizeAttribute implements Filter {
             chain.doFilter(request, response);
             return;
         }
+        if(servletPath.substring(servletPath.lastIndexOf("/")).equals("/email") ){
+            chain.doFilter(request, response);
+            return;
+        }
+
          if(headerAuthToken==null){
             HttpServletResponse httpResponse = (HttpServletResponse) response;
             httpResponse.setCharacterEncoding("UTF-8");

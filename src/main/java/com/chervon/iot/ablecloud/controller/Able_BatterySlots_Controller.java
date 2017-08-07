@@ -7,6 +7,7 @@ import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.service.imp.Mobile_UserLoginServiceImp;
 import com.chervon.iot.mobile.util.ErrorResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class Able_BatterySlots_Controller {
     /**
      * 单个设备下所有得电池#@RequestParam(value = "page[number]",required = false)Integer pageNumber,@RequestParam(value = "page[size]",required = false)Integer pageSize
      **/
+    @ApiAuthentication
     @GetMapping("/devices/{device_id}/battery_slots")
     public ResponseEntity<?> batterySlots(@RequestHeader String Authorization,@PathVariable String device_id,@RequestParam(value = "page[number]",required = false)
             Integer pageNumber,@RequestParam(value = "page[size]",required = false)Integer pageSize )throws Exception{
@@ -46,12 +48,14 @@ public class Able_BatterySlots_Controller {
 
     }
     //指定电池包数据
+    @ApiAuthentication
     @GetMapping("/battery_slots/{battery_slot_id}")
     public  ResponseEntity<?> batterySlot(@RequestHeader String Authorization,@PathVariable String battery_slot_id)throws Exception {
         return able_batterySlots_service.batterySlot(Authorization,battery_slot_id);
 
     }
     //关联
+    @ApiAuthentication
     @RequestMapping(value = "/battery_slots/{battery_slot_id}/relationships/device")
     public  ResponseEntity<?> batterySlotRelationship(@RequestHeader String Authorization, @PathVariable String battery_slot_id)throws Exception {
         String device_id=able_batterySlots_service.selectDeviceId(battery_slot_id);
