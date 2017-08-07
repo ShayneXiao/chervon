@@ -106,7 +106,7 @@ public class Mobile_CreateUserController {
         return mobile_userCreateService.updateUser(Authorization,device,mobileUser);
     }
     //邮箱email链接验证
-    @RequestMapping(value = "/users/aa/{Authorization}" ,method= RequestMethod.GET)
+    @RequestMapping(value = "/users/{Authorization}/email" ,method= RequestMethod.GET)
     public String updateUser(@PathVariable String Authorization)throws SQLException,Exception {
         HttpHeaders headers = HttpHeader.HttpHeader();
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));

@@ -65,7 +65,7 @@ public class Mobile_UserForgetPasswordController {
         return mobile_userForgetPasswordService.forgetPassword(type, email,device);
     }
     //email链接接收转向
-    @RequestMapping(value="/resets/{token}",method = RequestMethod.GET)
+    @RequestMapping(value="/resets/{token}/email",method = RequestMethod.GET)
     public ModelAndView resetPassword(@PathVariable String token)throws SQLException,Exception{
         String email=jwtTokenUtil.getEmailFromToken(token.substring(7));
         ModelAndView mav = new ModelAndView();

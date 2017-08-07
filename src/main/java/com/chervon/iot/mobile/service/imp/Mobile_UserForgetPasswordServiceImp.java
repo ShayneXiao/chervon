@@ -88,7 +88,7 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         jwtTokenUtil.setExpiration(expirationhours);
         if (mobile_user != null) {
             final String token = jwtTokenUtil.generateToken(mobile_user, device);
-            String url = emailUrl + "Bearer " + token;
+            String url = emailUrl + "Bearer " + token+"/email";
             sendEmail.sendEmail(url,email,mobile_user.getName());
             responData.setType(type);
             responData.setId("Bearer "+token);

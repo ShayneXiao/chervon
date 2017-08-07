@@ -105,7 +105,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         jwtTokenUtil.setExpiration(expiration1);
         String token = jwtTokenUtil.generateToken(user, device);
         //发送email
-        sendEmail.sendEmail(url+"Bearer "+ token, user.getEmail(), user.getName());
+        sendEmail.sendEmail(url+"Bearer "+ token+"/email", user.getEmail(), user.getName());
 
         mobile_userMapper.insert(user);
         //用户信息放入redis
@@ -230,7 +230,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             if (jsonNode.get("success").asText().equals("true")){
                 jwtTokenUtil.setExpiration(expiration1);
                 String token = jwtTokenUtil.generateToken(user, device);
-                sendEmail.sendEmail(url + "Bearer " + token,user.getEmail(),user.getName() );
+                sendEmail.sendEmail(url + "Bearer " + token+"/email",user.getEmail(),user.getName() );
                 mobile_userMapper.updateByPrimaryKey(user);
                 redisTemplate.delete(email);
                 redisTemplate.delete(user.getSfdcId());
