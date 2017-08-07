@@ -7,6 +7,7 @@ import com.chervon.iot.mobile.mapper.Mobile_UserMapper;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.model.entity.*;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.sercuity.filter.HTTPBearerAuthorizeAttribute;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
 import com.chervon.iot.mobile.util.BasicAuthorizeTokenUtil;
@@ -96,6 +97,7 @@ public class Mobile_LoginUserController {
      * @throws SQLException
      * @throws Exception
      */
+    @ApiAuthentication
     @GetMapping("/sessions")
     public  ResponseEntity<?> read(@RequestHeader String Authorization)throws SQLException,Exception{
         HttpHeaders headers=HttpHeader.HttpHeader();
@@ -113,6 +115,7 @@ public class Mobile_LoginUserController {
      * @throws SQLException
      * @throws Exception
      */
+    @ApiAuthentication
     @DeleteMapping("/sessions")
     public  ResponseEntity<?> delete(@RequestHeader String Authorization)throws SQLException,Exception{
         HttpHeaders headers=HttpHeader.HttpHeader();
@@ -132,6 +135,7 @@ public class Mobile_LoginUserController {
      * @throws SQLException
      * @throws Exception
      */
+    @ApiAuthentication
     @RequestMapping(value="/sessions/{session_id}/relationships/creator", method = RequestMethod.GET)
     public   ResponseEntity<?> relationship(@RequestHeader String Authorization,@PathVariable String session_id)throws SQLException,Exception {
         HttpHeaders headers = HttpHeader.HttpHeader();

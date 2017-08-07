@@ -6,6 +6,7 @@ import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.service.Mobile_UserForgetPasswordService;
 import com.chervon.iot.mobile.service.imp.Mobile_UserLoginServiceImp;
 import com.chervon.iot.mobile.util.ErrorResponseUtil;
@@ -92,6 +93,7 @@ public class Mobile_UserForgetPasswordController {
         return mav;
     }
     //
+    @ApiAuthentication
     @RequestMapping(value = "/resets" ,method=RequestMethod.PATCH)
     public String resetPassword(@RequestHeader String Authorization, @RequestBody String jsonData)throws SQLException,Exception {
 

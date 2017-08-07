@@ -4,6 +4,7 @@ import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.service.Mobile_UserCreateService;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
 import com.chervon.iot.mobile.util.ErrorResponseUtil;
@@ -70,6 +71,7 @@ public class Mobile_CreateUserController {
     }
 
     //查询指定用户的的信息
+    @ApiAuthentication
     @RequestMapping(value = "/users/{user_id}", method= RequestMethod.GET )
     public ResponseEntity<?> currentUser(@RequestHeader String Authorization,@PathVariable String user_id)throws SQLException,Exception{
         return   mobile_userCreateService.getCurrentUser(Authorization,user_id);
@@ -77,6 +79,7 @@ public class Mobile_CreateUserController {
     }
 
     //更新信息
+    @ApiAuthentication
     @RequestMapping(value = "/users/{user_id}" ,method= RequestMethod.PATCH)
     public ResponseEntity<?> updateUser(@RequestHeader String Authorization,Device device,@RequestBody String jsonData,@PathVariable String user_id)throws SQLException,Exception {
         HttpHeaders headers = HttpHeader.HttpHeader();

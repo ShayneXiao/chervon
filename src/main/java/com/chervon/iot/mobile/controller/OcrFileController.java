@@ -2,6 +2,7 @@ package com.chervon.iot.mobile.controller;
 
 
 import com.chervon.iot.common.util.HttpClientUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,8 @@ public class OcrFileController {
     private static final ObjectMapper mapper = new ObjectMapper();
     @Value("${ocr.base.url}")
     private  String baseUrl;
+
+    @ApiAuthentication
     @RequestMapping(value="/ocr")
     @ResponseBody
     public ResponseEntity<?> ocrLoad(@RequestParam("file") MultipartFile files)throws IOException,Exception{
