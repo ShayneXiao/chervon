@@ -64,8 +64,6 @@ public class Able_DeviceErrorsController {
             Able_Device able_device= able_deviceMapper.selectByDeviceUserSfId(mobile_user.getSfdcId(), device_id);
             if(able_device == null){
                 return this.falierResult(authorization);
-            }else{
-                throw new Exception();
             }
         }
         return able_deviceErrorsService.getDeviceErrors(device_id, pageNumber, pageSize);

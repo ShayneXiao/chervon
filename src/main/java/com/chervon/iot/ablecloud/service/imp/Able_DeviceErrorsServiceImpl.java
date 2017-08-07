@@ -190,8 +190,6 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
                 if(able_device == null){
                     return this.falierResult(authorization);
                 }
-            }else{
-                throw new Exception();
             }
             Map data = new HashMap(); Map attributes = new HashMap(); Map relationships = new HashMap();
             Map device = new HashMap(); Map links = new HashMap(); Map dataChild = new HashMap();
@@ -265,8 +263,9 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         String key = sn + recoverable + device + fault;
         String deviceErrors = valueOperations.get(key);
         if(deviceErrors != null){
-            redisTemplate.delete(key);
-
+            if("closed".equals(status) || "pendding".equals(status)){
+                redisTemplate.delete(key);
+            }
             AbleDeviceErrors ableDeviceErrors = JsonUtils.jsonToPojo(deviceErrors.toString(), AbleDeviceErrors.class);
             ableDeviceErrors.setStatus(status);
             AbleDeviceErrorsExample ableDeviceErrorsExample = new AbleDeviceErrorsExample();
@@ -276,7 +275,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         }
         Map map = new HashMap();
         map.put("code", "200");
-        map.put("msg", "Ended This Device Error");
+        map.put("msg", status + " this Device Error");
         return map;
     }
 
