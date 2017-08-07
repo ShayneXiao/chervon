@@ -71,8 +71,21 @@ public class LoadAndGetData {
      * @param deviceSNList
      * @return
      */
-    public String getDataList(List<String> deviceSNList) {
+    public String getDataList(List<String> deviceSNList) throws Exception {
+        //获取当前时间戳
+        GetUTCTime getUTCTime = new GetUTCTime();
+        long timeStamp = getUTCTime.getCurrentUTCTimeStr();
 
-        return null;
+        //封装请求头
+        Map<String,String> headMaps = HttpUtils.getHeadMaps(timeStamp,"getStatusList");
+
+        //封装请求体
+        Map<String,List<String>> requsetBody = new HashMap<>();
+        requsetBody.put("sn",deviceSNList);
+        String requestJson = JsonUtils.objectToJson(requsetBody);
+
+        //发送请求，并获得结果
+        String  jsonData= HttpClientUtil.doPostJson(ablecloudUrl+"getStatusList",requestJson,headMaps);
+        return jsonData;
     }
 }
