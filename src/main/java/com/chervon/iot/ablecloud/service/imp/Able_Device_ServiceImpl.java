@@ -4,7 +4,6 @@ import com.chervon.iot.ablecloud.mapper.Able_DeviceMapper;
 import com.chervon.iot.ablecloud.model.*;
 import com.chervon.iot.ablecloud.service.Able_Device_Service;
 import com.chervon.iot.ablecloud.util.*;
-import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.util.GetUTCTime;
 import com.chervon.iot.mobile.mapper.Mobile_UserMapper;
 import com.chervon.iot.mobile.model.Mobile_User;
@@ -29,8 +28,6 @@ import java.util.Map;
 @Service
 public class Able_Device_ServiceImpl implements Able_Device_Service {
     @Autowired
-    private Mobile_UserMapper userMapper;
-    @Autowired
     private Able_DeviceMapper deviceMapper;
     @Autowired
     private LoadAndGetData loadAndGetData;
@@ -47,33 +44,32 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 查询device的集合并返回
-     * @param email
+     * @param mobileUser,pageNum,pageSize
      * @param pageNum
      * @param pageSize
      * @return
      * @throws Exception
      */
     @Override
-    public Able_ResponseListBody selectDeviceList(String email, Integer pageNum, Integer pageSize) throws Exception {
-        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+    public Able_ResponseListBody selectDeviceList(Mobile_User mobileUser, Integer pageNum, Integer pageSize) throws Exception {
         String userSfdcId = mobileUser.getSfdcId();
+
         if (pageNum != null && pageSize != null) {
             PageHelper.startPage(pageNum, pageSize);
         }
+        //获取device集合
+        List<Able_Device> devices = deviceMapper.selectDevicesByUserSfid(userSfdcId);
 
         Able_ResponseListBody responseBody = null;
-        //获取device集合
-        List<Able_Device> devices = deviceMapper.selectDevicesByUserSfid(mobileUser.getSfdcId());
+
         //如果devices不为空，并且devices的长度大于0，则继续执行
         if (devices != null && devices.size() > 0) {
-            //获取device id集合
-            List<String> deviceIds = new ArrayList<>();
+            List<String> deviceSNList = new ArrayList<>();
             for (Able_Device device : devices) {
-                deviceIds.add(device.getDeviceId());
+                deviceSNList.add(device.getDeviceId());
             }
-            //从able查询数据
-            String deviceDataList = loadAndGetData.getDataResult(deviceIds, "psStatus");
-            JsonNode deviceJsonNodeList = jsonMapper.readTree(deviceDataList);
+            String dataList = loadAndGetData.getDataList(deviceSNList);
+            JsonNode deviceJsonNodeList = jsonMapper.readTree(dataList);
 
             List<Able_ResponseData> responseDataList = new ArrayList<>();
             List<Able_ResponseData> includeds = new ArrayList<>();
@@ -478,27 +474,15 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 查询特定的device并返回
-     * @param device_id
+     * @param device,mobileUser
      * @return
      */
     @Override
-    public Object selectDeviceByDeviceId(String device_id) throws Exception {
+    public Object selectDeviceByDeviceId(Able_Device device,Mobile_User mobileUser) throws Exception {
         System.out.println("----------------进入read device的service层实现类----------------");
+        String device_id = device.getDeviceId();
+        String userSfdcId = mobileUser.getSfdcId();
 
-        //从本地数据库获取数据
-        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
-        if (device == null) {
-            ResultMsg.Error error = new ResultMsg.Error();
-            error.setStatus(404);
-            error.setMessage(null);
-            error.setTitle("Object not found.");
-            Map<String, String> source = new HashMap<>();
-            source.put("pointer", "");
-            error.setSource(source);
-            return error;
-        }
-        String userSfdcId = device.getUsersfid();
-        Mobile_User mobileUser = userMapper.getUserSfid(userSfdcId);
 
         Map<String, String> loadAndGetDataParam = new HashMap<>();
         loadAndGetDataParam.put("sn", device_id);
@@ -522,7 +506,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
         /**封装responseData字段*/
         responseData.setType("devices");
-        responseData.setId("1");
+        responseData.setId(device_id);
 
         /**封装responseData中的attribute*/
         Map<String, Object> responseDataAttributes = new HashMap<>();
@@ -678,6 +662,8 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         checkParam.put("user_sfid", userSfdcId);
         checkParam.put("sn", device_id);
         String checkUpdateJsonResult = checkAndUpdateOTA.getCheckUpdateResult(checkParam);
+        System.out.println("开始：----------------"
+                + checkUpdateJsonResult.toString() + "----------------：结束");
         JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
 
         //从Able获取Heartbeat数据
@@ -824,26 +810,14 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     /**
      * 根据device_id,deviceStatus更新设备
      *
-     * @param device_id
+     * @param device,mobileUser,updateStatus
      * @param updateStatus
      * @return
      */
     @Override
-    public Object updateDevice(String device_id, String updateStatus) throws Exception {
+    public Object updateDevice(Able_Device device,Mobile_User mobileUser, String updateStatus) throws Exception {
         //解析数据
-        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
-        if (device == null) {
-            ResultMsg.Error error = new ResultMsg.Error();
-            error.setTitle("Object not found.");
-            error.setStatus(404);
-            error.setMessage(null);
-            Map<String, String> source = new HashMap<>();
-            source.put("pointer", "");
-            error.setSource(source);
-            return error;
-        }
-
-        Mobile_User mobileUser = userMapper.getUserSfid(device.getUsersfid());
+        String device_id = device.getDeviceId();
 
         /**从able获取controlDevice数据*/
         //拼装参数
@@ -1190,31 +1164,19 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     public void deleteByDeviceId(String device_id) {
         Able_Device device = new Able_Device();
         device.setDeviceId(device_id);
-        device.setIsdelete("true");
+        device.setIsdelete(true);
         deviceMapper.updateByPrimaryKeySelective(device);
     }
 
     /**
      * 根据device_id查询user并返回
      *
-     * @param device_id
+     * @param device,mobileUser
      * @return
      */
     @Override
-    public Object selectCreatorByDeviceId(String device_id) {
-        //从pg获取数据
-        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
-        if (device == null) {
-            ResultMsg.Error error = new ResultMsg.Error();
-            error.setStatus(404);
-            error.setTitle("Object not found.");
-            error.setMessage(null);
-            Map<String, String> source = new HashMap<>();
-            source.put("pointer", "");
-            error.setSource(source);
-            return error;
-        }
-        Mobile_User user = userMapper.getUserSfid(device.getUsersfid());
+    public Object selectCreatorByDeviceId(Able_Device device, Mobile_User mobileUser) {
+        String device_id = device.getDeviceId();
 
         /**封装responseBody中的links*/
         Map<String, String> contentLinks = new HashMap<>();
@@ -1224,7 +1186,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         /**封装responseBody中的data*/
         Map<String, String> contentData = new HashMap<>();
         contentData.put("type", "users");
-        contentData.put("id", user.getSfdcId());
+        contentData.put("id", mobileUser.getSfdcId());
 
         /**封装responseBody*/
         Able_Relationship responseBody = new Able_Relationship();
@@ -1236,11 +1198,13 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     /**
      * 根据device_id查询outlet并返回
      *
-     * @param device_id
+     * @param device
      * @return
      */
     @Override
-    public Able_Relationship selectOutletsByDeviceId(String device_id) throws Exception {
+    public Able_Relationship selectOutletsByDeviceId(Able_Device device) throws Exception {
+        String device_id = device.getDeviceId();
+
         /**创建rsponseBody对象*/
         Able_Relationship responseBody = new Able_Relationship();
         /**封装rspoonseBody中的links*/
@@ -1260,11 +1224,13 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询events并返回
-     * @param device_id
+     * @param device
      * @return
      */
     @Override
-    public Able_Relationship selectEventByDeviceId(String device_id) {
+    public Able_Relationship selectEventByDeviceId(Able_Device device) {
+        String device_id = device.getDeviceId();
+
         /**创建rsponseBody对象*/
         Able_Relationship responseBody = new Able_Relationship();
         /**封装rspoonseBody中的links*/
@@ -1284,11 +1250,13 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询device_errors并返回
-     * @param device_id
+     * @param device
      * @return
      */
     @Override
-    public Able_Relationship selectDeviceErrorsByDeviceId(String device_id) {
+    public Able_Relationship selectDeviceErrorsByDeviceId(Able_Device device) {
+        String device_id = device.getDeviceId();
+
         /**创建rsponseBody对象*/
         Able_Relationship responseBody = new Able_Relationship();
         /**封装rspoonseBody中的links*/
@@ -1308,11 +1276,13 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询firmware并返回
-     * @param device_id
+     * @param device
      * @return
      */
     @Override
-    public Able_Relationship selectFirmwareByDeviceId(String device_id) {
+    public Able_Relationship selectFirmwareByDeviceId(Able_Device device) {
+        String device_id = device.getDeviceId();
+
         /**封装responseBody中的links*/
         Map<String, String> contentLinks = new HashMap<>();
         contentLinks.put("self", baseLink + "devices/" + device_id + "/relationships/firmware");
@@ -1332,11 +1302,13 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询heartbeat并返回
-     * @param device_id
+     * @param device
      * @return
      */
     @Override
-    public Able_Relationship selectHeartbeatByDeviceId(String device_id) {
+    public Able_Relationship selectHeartbeatByDeviceId(Able_Device device) {
+        String device_id = device.getDeviceId();
+
         /**封装responseBody中的links*/
         Map<String, String> contentLinks = new HashMap<>();
         contentLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");

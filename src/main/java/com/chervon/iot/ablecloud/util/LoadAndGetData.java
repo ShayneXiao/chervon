@@ -68,11 +68,10 @@ public class LoadAndGetData {
 
     /**
      * 获取多个device的信息
-     * @param ids
-     * @param status
+     * @param deviceSNList
      * @return
      */
-    public String getDataResult(List<String> ids, String status) {
+    public String getDataList(List<String> deviceSNList) {
 
         return null;
     }

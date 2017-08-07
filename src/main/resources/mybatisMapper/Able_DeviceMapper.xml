@@ -123,7 +123,7 @@
     WHERE username = #{email}
   </select>
 
-  <select id="selectByDeviceUserSfId" parameterType="map" resultType="com.chervon.iot.ablecloud.model.Able_Device">
+  <select id="selectByDeviceUserSfId" resultType="com.chervon.iot.ablecloud.model.Able_Device">
     SELECT <include refid="Base_Column_List" />
     from able_device
     where usersfid = #{usersfid,jdbcType=VARCHAR} AND device_id  = #{device_id,jdbcType=VARCHAR}
