@@ -68,7 +68,7 @@ public class Able_BatterySlots_Controller {
         Map<String,String> links = new HashMap<>();
         Map<String,String> data = new HashMap<>();
         links.put("self",Base_Url+"battery_slots/"+battery_slot_id+"/relationships");
-        links.put("related",Base_Url+"battery_slots"+battery_slot_id+"/device");
+        links.put("related",Base_Url+"battery_slots/"+battery_slot_id+"/device");
         data.put("type","device");
 
         data.put("id",device_id);
