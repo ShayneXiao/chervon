@@ -175,7 +175,7 @@ public class HttpClientUtil {
 			response = httpClient.execute(httpPost);
 			resultString = EntityUtils.toString(response.getEntity(), "utf-8");
 			JsonNode result = mapper.readTree(resultString);
-			if(!StringUtils.isBlank(result.get("error").asText())){
+			if(result.get("error") != null){
 				throw new Bad_RequestException();
 			}
 		} catch (Exception e){

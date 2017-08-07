@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -52,20 +51,21 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
 
     @Override
     @Transactional
-    public Map createDeviceError(AbleDeviceErrors ableDeviceErrors) {
+    public ResponseEntity<?> createDeviceError(AbleDeviceErrors ableDeviceErrors) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String key = ableDeviceErrors.getSn() + ableDeviceErrors.getRecoverable() + ableDeviceErrors.getDevice() + ableDeviceErrors.getFault();
         Object deviceErrors = valueOperations.get(key);
         Map map = new HashMap();
-        map.put("code", "200");
         if(deviceErrors == null){
             ableDeviceErrorsMapper.insert(ableDeviceErrors);
             valueOperations.set(key, JsonUtils.objectToJson(ableDeviceErrors));
             map.put("msg", "success");
-            return map;
+            return new ResponseEntity<Object>(map, headers, HttpStatus.OK);
         }
         map.put("msg", "This Device Error has existed ");
-        return map;
+        return new ResponseEntity<Object>(map, headers, HttpStatus.OK);
     }
 
     @Override
@@ -258,10 +258,13 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
 
     @Override
     @Transactional
-    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault, String status) {
+    public ResponseEntity<?> endedDeviceError(String sn, boolean recoverable, String device, String fault, String status) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String key = sn + recoverable + device + fault;
         String deviceErrors = valueOperations.get(key);
+        Map map = new HashMap();
         if(deviceErrors != null){
             if("closed".equals(status) || "pendding".equals(status)){
                 redisTemplate.delete(key);
@@ -272,11 +275,15 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             AbleDeviceErrorsExample.Criteria criteria = ableDeviceErrorsExample.createCriteria();
             criteria.andDeviceEqualTo(device).andSnEqualTo(sn).andRecoverableEqualTo(recoverable).andFaultEqualTo(fault);
             ableDeviceErrorsMapper.updateByExampleSelective(ableDeviceErrors, ableDeviceErrorsExample);
+
+            map.put("msg", status + " this Device Error");
+            return new ResponseEntity<Object>(map, headers, HttpStatus.OK);
+        }else{
+            map.put("msg", "This Device Error doesn't existed !!!");
+            return new ResponseEntity<Object>(map, headers, HttpStatus.OK);
         }
-        Map map = new HashMap();
-        map.put("code", "200");
-        map.put("msg", status + " this Device Error");
-        return map;
+
+
     }
 
     private ResponseEntity<?> falierResult (String authorization){

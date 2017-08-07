@@ -1,6 +1,7 @@
 package com.chervon.iot.ablecloud.mapper;
 
 import com.chervon.iot.ablecloud.model.Able_Device;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -62,5 +63,5 @@ public interface Able_DeviceMapper {
      */
     int updateByPrimaryKey(Able_Device record);
 
-    Able_Device selectByDeviceUserSfId(String usersfid, String device_id);
+    Able_Device selectByDeviceUserSfId(@Param("usersfid") String usersfid, @Param("device_id")String device_id);
 }

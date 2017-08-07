@@ -22,16 +22,16 @@ import java.util.Properties;
 @Configuration
 public class WebSecurityConfig {
 
-    @Bean
+    /*@Bean
     public FilterRegistrationBean jwtFilterRegistrationBean(){
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();
         HTTPBearerAuthorizeAttribute httpBearerFilter = new HTTPBearerAuthorizeAttribute();
         registrationBean.setFilter(httpBearerFilter);
         List<String> urlPatterns = new ArrayList<String>();
-        urlPatterns.add("/api/v1/*");
+        urlPatterns.add("/api/v1*//*");
         registrationBean.setUrlPatterns(urlPatterns);
         return registrationBean;
-    }
+    }*/
 
 
 

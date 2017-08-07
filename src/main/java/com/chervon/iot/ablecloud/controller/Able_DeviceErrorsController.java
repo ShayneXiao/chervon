@@ -6,6 +6,7 @@ import com.chervon.iot.ablecloud.model.Able_Device;
 import com.chervon.iot.ablecloud.service.Able_DeviceErrorsService;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
 import com.chervon.iot.mobile.util.JavaMailUtil;
 import com.chervon.iot.mobile.util.JsonUtils;
@@ -42,15 +43,16 @@ public class Able_DeviceErrorsController {
     private Able_DeviceMapper able_deviceMapper;
 
     @PostMapping("/devices/createDeviceError")
-    public Map createDeviceError(String sn, long timestamp, boolean recoverable, String device, String fault) {
+    public ResponseEntity<?> createDeviceError(String sn, long timestamp, boolean recoverable, String device, String fault) {
         AbleDeviceErrors ableDeviceErrors = new AbleDeviceErrors(sn, recoverable, device, fault);
         Date date = new Date(timestamp);
         ableDeviceErrors.setTimestamp(date);
-        ableDeviceErrors.setStatus("pending");
+        ableDeviceErrors.setStatus("create");
         return able_deviceErrorsService.createDeviceError(ableDeviceErrors);
     }
 
     @GetMapping("/devices/{device_id}/device_errors")
+    @ApiAuthentication
     public ResponseEntity<?> getDeviceErrors(@RequestHeader("Authorization")String authorization, @PathVariable("device_id") String device_id,
                                              @RequestParam("page[number]") Integer pageNumber, @RequestParam("page[size]") Integer pageSize) throws Exception {
         authorization = authorization.substring(7);
@@ -75,7 +77,7 @@ public class Able_DeviceErrorsController {
     }
 
     @PostMapping("/devices/endedDeviceError")
-    public Map endedDeviceError(String sn, boolean recoverable, String device, String fault, String status){
+    public ResponseEntity<?>  endedDeviceError(String sn, boolean recoverable, String device, String fault, String status){
         return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault, status);
     }
 
