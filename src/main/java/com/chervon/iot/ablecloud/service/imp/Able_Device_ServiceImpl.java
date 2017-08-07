@@ -57,31 +57,19 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         if (pageNum != null && pageSize != null) {
             PageHelper.startPage(pageNum, pageSize);
         }
+        //获取device集合
         List<Able_Device> devices = deviceMapper.selectDevicesByUserSfid(userSfdcId);
 
         Able_ResponseListBody responseBody = null;
-        //获取device集合
-        System.out.println(userSfdcId);
 
         //如果devices不为空，并且devices的长度大于0，则继续执行
         if (devices != null && devices.size() > 0) {
-            //封装获取数据对象参数
-            Map<String, String> getDataParamMap = new HashMap<>();
-            getDataParamMap.put("type", "psStatus");
-
-            List<JsonNode> deviceJsonNodeList = new ArrayList<>();
-            String getDataResult = null;
-
+            List<String> deviceSNList = new ArrayList<>();
             for (Able_Device device : devices) {
-                if (getDataParamMap.containsKey("sn")) {
-                    getDataParamMap.remove("sn");
-                }
-                getDataParamMap.put("sn", device.getDeviceId());
-
-                //从able获取数据
-                getDataResult = loadAndGetData.getDataResult(getDataParamMap);
-                deviceJsonNodeList.add(jsonMapper.readTree(getDataResult));
+                deviceSNList.add(device.getDeviceId());
             }
+            String dataList = loadAndGetData.getDataList(deviceSNList);
+            JsonNode deviceJsonNodeList = jsonMapper.readTree(dataList);
 
             List<Able_ResponseData> responseDataList = new ArrayList<>();
             List<Able_ResponseData> includeds = new ArrayList<>();
