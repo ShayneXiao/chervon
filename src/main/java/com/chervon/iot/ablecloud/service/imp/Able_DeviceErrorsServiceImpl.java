@@ -275,7 +275,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         }
         Map map = new HashMap();
         map.put("code", "200");
-        map.put("msg", "Ended This Device Error");
+        map.put("msg", status + " this Device Error");
         return map;
     }
 
