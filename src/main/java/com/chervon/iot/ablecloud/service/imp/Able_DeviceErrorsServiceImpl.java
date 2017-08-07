@@ -171,7 +171,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     }
 
     @Override
-    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(String authorization, Integer device_error_id) throws Exception {
+    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(String authorization, Integer device_error_id){
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type","application/vnd.api+json");
 
@@ -190,8 +190,6 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
                 if(able_device == null){
                     return this.falierResult(authorization);
                 }
-            }else{
-                throw new Exception();
             }
             Map data = new HashMap(); Map attributes = new HashMap(); Map relationships = new HashMap();
             Map device = new HashMap(); Map links = new HashMap(); Map dataChild = new HashMap();
