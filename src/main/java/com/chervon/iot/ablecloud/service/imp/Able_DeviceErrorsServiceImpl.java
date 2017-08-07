@@ -171,7 +171,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
     }
 
     @Override
-    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(String authorization, Integer device_error_id){
+    public ResponseEntity<?> getDeviceErrorByDeviceErrorID(String authorization, Integer device_error_id) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type","application/vnd.api+json");
 
