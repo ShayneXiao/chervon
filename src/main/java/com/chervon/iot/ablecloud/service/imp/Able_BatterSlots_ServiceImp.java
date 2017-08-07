@@ -198,7 +198,6 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
             ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
             return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
         }
-        if(able_battery!=null){
             Able_Device able_device = able_deviceMapper.selectByPrimaryKey(able_battery.getDevice_id());
             String email =jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
             Mobile_User mobile_user= mobile_userLoginServiceImp.getUserByEmail(email);
@@ -207,7 +206,6 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
                 return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
 
             }
-        }
         String method ="getData";
         GetUTCTime getUTCTime = new GetUTCTime();
         long timesStamp = getUTCTime.getCurrentUTCTimeStr(new Date());
