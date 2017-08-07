@@ -157,6 +157,7 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             }
             responseData.setType("users");
             responseData.setId(user.getSfdcId());
+            responseData.setRelationships(new HashMap<>());
             Map<String, String> attribute = new HashMap();
             attribute.put("name", user.getName());
             attribute.put("email", user.getEmail());

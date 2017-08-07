@@ -7,6 +7,7 @@ import com.chervon.iot.ablecloud.service.Able_BatterySlots_Service;
 import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.HttpUtils;
 import com.chervon.iot.common.common_util.HttpHeader;
+import com.chervon.iot.common.exception.Bad_RequestException;
 import com.chervon.iot.common.exception.ResultMsg;
 import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.common.util.GetUTCTime;
@@ -55,11 +56,16 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     @Transactional
     @Override
     public ResponseEntity<?> batterySlots(String Authorization,String device_id,int pageNumber,int pageSize)throws IOException,Exception {
-        Able_Device able_device = able_deviceMapper.selectByPrimaryKey(device_id);
-        String email =jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
-       Mobile_User mobile_user= mobile_userLoginServiceImp.getUserByEmail(email);
         HttpHeaders headers = HttpHeader.HttpHeader();
         headers.add("Authorization",Authorization);
+        Able_Device able_device = able_deviceMapper.selectByPrimaryKey(device_id);
+        if (able_device == null) {
+            ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
+            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
+        }
+        String email =jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+       Mobile_User mobile_user= mobile_userLoginServiceImp.getUserByEmail(email);
+
         if(!mobile_user.getSfdcId().equals(able_device.getUsersfid())){
             ResultMsg resultMsg = ErrorResponseUtil.forbidend();
             return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
@@ -176,6 +182,9 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
     @Override
     public String selectDeviceId(String battery_slot_id)throws Exception {
         Able_Battery able_battery = able_batteryMapper.selectDeviceId(battery_slot_id);
+        if (able_battery == null) {
+           throw new  Bad_RequestException();
+        }
         return able_battery.getDevice_id();
     }
     //拿指定的电池包
@@ -185,6 +194,10 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         HttpHeaders headers = HttpHeader.HttpHeader();
         headers.add("Authorization",Authorization);
         Able_Battery able_battery =able_batteryMapper.selectDeviceId(battery_slot_id);
+        if(able_battery==null){
+            ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
+            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
+        }
         if(able_battery!=null){
             Able_Device able_device = able_deviceMapper.selectByPrimaryKey(able_battery.getDevice_id());
             String email =jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
