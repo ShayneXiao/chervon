@@ -1,6 +1,18 @@
 package com.chervon.iot.ablecloud.util;
 
+import com.chervon.iot.ablecloud.model.Able_Device;
+import com.chervon.iot.common.common_util.HttpHeader;
+import com.chervon.iot.common.exception.ResultMsg;
+import com.chervon.iot.mobile.model.Mobile_User;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Admin on 2017/7/31.
@@ -66,5 +78,89 @@ public class DeviceUtils {
         double dumpEnergyPercent4 = jsonNode.get("bat4").get("dumpEnergyPercent").asDouble();
         Double dumpEnergyPercent = (dumpEnergyPercent1 + dumpEnergyPercent2 + dumpEnergyPercent3 + dumpEnergyPercent4) / 4.0;
         return dumpEnergyPercent;
+    }
+
+    /**
+     * 获得错误信息对象（404）
+     * @return
+     */
+    public static ResultMsg getNotFound() {
+        ResultMsg.Error error = new ResultMsg.Error();
+        error.setStatus(404);
+        error.setTitle("Object not found.");
+        error.setMessage(null);
+        Map<String, String> source = new HashMap<>();
+        source.put("pointer", "");
+        error.setSource(source);
+
+        List<ResultMsg.Error> errorList = new ArrayList<>();
+        errorList.add(error);
+        return new ResultMsg(errorList);
+    }
+
+    /**
+     * 获得错误信息respones对象（404）
+     * @return
+     */
+    public static ResponseEntity<Object> getNotFoundResponse(String Authorization) {
+        ResultMsg.Error error = new ResultMsg.Error();
+        error.setStatus(404);
+        error.setTitle("Object not found.");
+        error.setMessage(null);
+        Map<String, String> source = new HashMap<>();
+        source.put("pointer", "");
+        error.setSource(source);
+
+        List<ResultMsg.Error> errorList = new ArrayList<>();
+        errorList.add(error);
+        ResultMsg resultMsg = new ResultMsg(errorList);
+
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        headers.add("Authorization","Bearer "+Authorization);
+        return new ResponseEntity<Object>(resultMsg, headers, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    /**
+     * 获得错误信息response对象（403）
+     * @return
+     */
+    public static ResponseEntity<?> getCannotPerformResponse(String Authorization) {
+        ResultMsg.Error error = new ResultMsg.Error();
+        error.setStatus(403);
+        error.setTitle("You cannot perform this action.");
+        error.setMessage(null);
+        Map<String, String> source = new HashMap<>();
+        source.put("pointer", "");
+        error.setSource(source);
+
+        List<ResultMsg.Error> errorList = new ArrayList<>();
+        errorList.add(error);
+        ResultMsg resultMsg = new ResultMsg(errorList);
+
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        headers.add("Authorization","Bearer "+Authorization);
+        return new ResponseEntity<Object>(resultMsg, headers, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    /**
+     * 判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证
+     * @param mobileUser
+     * @param device
+     * @param Authorization
+     * @return
+     */
+    public static ResponseEntity<?> check(Mobile_User mobileUser, Able_Device device,String Authorization) {
+        ResponseEntity<?> responseEntity = null;
+        if (mobileUser == null | device == null) {
+            responseEntity = DeviceUtils.getNotFoundResponse(Authorization);
+        } else if (!"verified".equals(mobileUser.getStatus())) {
+            responseEntity = DeviceUtils.getCannotPerformResponse(Authorization);
+        } else if (mobileUser.getSfdcId() == null || device.getUsersfid() == null ||
+                !mobileUser.getSfdcId().equals(device.getUsersfid())) {
+            System.out.println(mobileUser.getSfdcId());
+            System.out.println(device.getUsersfid());
+            responseEntity = DeviceUtils.getCannotPerformResponse(Authorization);
+        }
+        return responseEntity;
     }
 }

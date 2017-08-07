@@ -33,25 +33,20 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
     private ObjectMapper jsonMapper;
     @Autowired
     private CheckAndUpdateOTA checkAndUpdateOTA;
-    @Autowired
-    private Mobile_UserMapper userMapper;
-    @Autowired
-    private Able_DeviceMapper deviceMapper;
     @Value("${relation_BaseLink}")
     private String baseLink;
 
     /**
      * 查询firmware是否有更新
      *
-     * @param paramMap
+     * @param device,mobileUser
      * @return
      */
     @Override
-    public Able_ResponseBody selectFirmwareByDeviceId(Map<String,String> paramMap) throws Exception {
-        //解析paramMap
-        String email = paramMap.get("email");
-        String device_id = paramMap.get("device_id");
+    public Able_ResponseBody selectFirmwareByDeviceId(Able_Device device,Mobile_User mobileUser) throws Exception {
+        String device_id = device.getDeviceId();
 
+        //封装请求参数
         Map<String, String> loadAndGetDataParam = new HashMap<>();
         loadAndGetDataParam.put("sn", device_id);
         //type如何确定？？？
@@ -61,12 +56,9 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
         String deviceJsonData = loadAndGetData.getDataResult(loadAndGetDataParam);
         JsonNode deviceJsonNode = jsonMapper.readTree(deviceJsonData);
 
-        //从pg获取数据
-        Mobile_User user = userMapper.getUserByEmail(email);
-
         //从able获取更新信息（checkUpdate）
         Map<String, String> checkUpdateParam = new HashMap<>();
-        checkUpdateParam.put("user_sfid", user.getSfdcId());
+        checkUpdateParam.put("user_sfid", mobileUser.getSfdcId());
         checkUpdateParam.put("sn", device_id);
         String checkUpdateJsonResult = checkAndUpdateOTA.getCheckUpdateResult(checkUpdateParam);
         JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
@@ -158,18 +150,15 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
 
     /**
      * 更新firmware
-     * @param paramMap
+     * @param user,device,targetVersion
      * @return
      */
     @Override
-    public Able_ResponseBody updateFirmware(Map<String, String> paramMap) throws Exception {
-        //解析paramMap
-        String targetVersion = paramMap.get("version");
-        String sn = paramMap.get("device_id");
+    public Able_ResponseBody updateFirmware(Mobile_User user,Able_Device device,
+                                            String targetVersion) throws Exception {
+        String sn = device.getDeviceId();
 
         //获取user的sfid
-        Able_Device device = deviceMapper.selectByPrimaryKey(sn);
-        Mobile_User user = userMapper.getUserSfid(device.getUsersfid());
         String user_sfid = user.getSfdcId();
 
         //拼装getConfirmUpdateResult参数
@@ -287,14 +276,11 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
 
     /**
      * 根据firmware_id查询与之关联的device
-     * @param paramMap
+     * @param firmware_id
      * @return
      */
     @Override
-    public Able_Relationship selectDeviceByFirmwareId(Map<String, String> paramMap) {
-        //解析paramMap
-        String firmware_id = paramMap.get("firmware_id");
-
+    public Able_Relationship selectDeviceByFirmwareId(String firmware_id) {
         //截取设备Id：firmwareId = "firmwares_"+设备Id
         String deviceId = firmware_id.replace("firmwares_", "");
 
