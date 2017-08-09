@@ -77,9 +77,9 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
             Map<String, String> linksRes = new HashMap<>();
 
             //遍历deviceJsonNodeList
-            for (int i = 0; i < deviceJsonNodeList.size(); i++) {
+            for (int i = 0; i < deviceJsonNodeList.get("list").size(); i++) {
                 //每一个deviceJsonNode
-                JsonNode deviceJsonNode = deviceJsonNodeList.get(i);
+                JsonNode deviceJsonNode = deviceJsonNodeList.get("list").get(i);
                 //获得device_id
                 String device_id = devices.get(i).getDeviceId();
 
