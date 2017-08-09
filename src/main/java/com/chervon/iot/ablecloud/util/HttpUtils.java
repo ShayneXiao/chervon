@@ -103,27 +103,33 @@ public class HttpUtils {
         return sb.toString();
     }
 
-
-
+    /**
+     * 修改了timesTamp,将其修改为timeStamp并除以1000
+     * @param timesTamp
+     * @param method
+     * @return
+     */
     public static Map<String,String> getHeadMaps(long timesTamp, String method){
         //  GetUTCTime getUTCTime = new GetUTCTime();
 //        long mill = getUTCTime.getCurrentUTCTimeStr();
+        long timeStamp = timesTamp / 1000;
 
-        Map<String,String> headMaps = new HashMap<>();
-        headMaps.put("Content-Type","application/x-zc-object");
-        headMaps.put("X-Zc-Major-Domain",MAJOR_DOMAIN);
-        headMaps.put("X-Zc-Sub-Domain","");
-        headMaps.put("X-Zc-Developer-Id",String.valueOf(DEVELOPER_ID));
-        headMaps.put("X-Zc-Timestamp",String.valueOf(timesTamp/1000));
-        headMaps.put("X-Zc-Timeout",String.valueOf(TIME_OUT));
+        Map<String, String> headMaps = new HashMap<>();
+        headMaps.put("Content-Type", "application/x-zc-object");
+        headMaps.put("X-Zc-Major-Domain", MAJOR_DOMAIN);
+        headMaps.put("X-Zc-Developer-Id", String.valueOf(DEVELOPER_ID));
+        headMaps.put("X-Zc-Timestamp", String.valueOf(timeStamp));
+        headMaps.put("X-Zc-Timeout", String.valueOf(TIME_OUT));
 
-        String nonceStr = getNonce(timesTamp,16);
-        headMaps.put("X-Zc-Nonce",nonceStr);
-        headMaps.put("X-Zc-Access-Key",ACCESS_KEY);
+        String nonceStr = getNonce(timeStamp, 16);
+        headMaps.put("X-Zc-Nonce", nonceStr);
+
         // String signString = "";
         // signString = TIME_OUT + "" + timesTamp/1000 + nonceStr + DEVELOPER_ID + "chervon" + method;
-        String signString=getSignString(DEVELOPER_ID,  MAJOR_DOMAIN,"",method ,timesTamp/1000,  TIME_OUT,  nonceStr);
-        headMaps.put("X-Zc-Developer-Signature",getSignature(SECRET_KEY,signString));
+        String signString = getSignString(DEVELOPER_ID, MAJOR_DOMAIN, "", method, timeStamp, TIME_OUT, nonceStr);
+        headMaps.put("X-Zc-Developer-Signature", getSignature(SECRET_KEY, signString));
+        headMaps.put("X-Zc-Access-Key", ACCESS_KEY);
+        headMaps.put("X-Zc-Sub-Domain", "");
         return headMaps;
     }
 }

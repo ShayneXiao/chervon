@@ -1,9 +1,6 @@
 package com.chervon.iot.ablecloud.service;
 
-import com.chervon.iot.ablecloud.model.Able_Device;
-import com.chervon.iot.ablecloud.model.Able_Relationship;
-import com.chervon.iot.ablecloud.model.Able_ResponseListBody;
-import com.chervon.iot.mobile.model.Mobile_User;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Created by ZAC on 2017-7-27.
@@ -12,23 +9,21 @@ import com.chervon.iot.mobile.model.Mobile_User;
  * Modified Date:
  */
 public interface Able_Device_Service {
-    Able_ResponseListBody selectDeviceList(Mobile_User mobileUser, Integer number, Integer size) throws Exception;
+    Object selectDeviceList(String Authorization, Integer number, Integer size) throws Exception;
 
-    Object selectDeviceByDeviceId(Able_Device device, Mobile_User mobileUser) throws Exception;
+    Object selectDeviceByDeviceId(String Authorization, String device_id) throws Exception;
 
-    Object updateDevice(Able_Device device,Mobile_User mobileUser, String updateStatus) throws Exception;
+    Object updateDevice(String Authorization, String device_id, String updateStatus) throws Exception;
 
-    void deleteByDeviceId(String device_id);
+    ResponseEntity deleteByDeviceId(String authorization, String device_id);
 
-    Object selectCreatorByDeviceId(Able_Device device, Mobile_User mobileUser);
+    Object selectCreatorByDeviceId(String Authorization, String device_id);
 
-    Able_Relationship selectOutletsByDeviceId(Able_Device device) throws Exception;
+    Object selectOutletsByDeviceId(String Authorization, String device_id) throws Exception;
 
-    Able_Relationship selectEventByDeviceId(Able_Device device);
+    Object selectEventByDeviceId(String Authorization, String device_id);
 
-    Able_Relationship selectDeviceErrorsByDeviceId(Able_Device device);
+    Object selectDeviceErrorsByDeviceId(String Authorization, String device_id);
 
-    Able_Relationship selectFirmwareByDeviceId(Able_Device device);
-
-    Able_Relationship selectHeartbeatByDeviceId(Able_Device device);
+    Object selectFirmwareByDeviceId(String authorization, String device);
 }

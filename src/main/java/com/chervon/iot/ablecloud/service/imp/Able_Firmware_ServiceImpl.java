@@ -8,10 +8,13 @@ import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.ablecloud.util.LoadAndGetData;
 import com.chervon.iot.mobile.mapper.Mobile_UserMapper;
 import com.chervon.iot.mobile.model.Mobile_User;
+import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,18 +36,34 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
     private ObjectMapper jsonMapper;
     @Autowired
     private CheckAndUpdateOTA checkAndUpdateOTA;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private Mobile_UserMapper userMapper;
+    @Autowired
+    private Able_DeviceMapper deviceMapper;
     @Value("${relation_BaseLink}")
     private String baseLink;
 
     /**
      * 查询firmware是否有更新
-     *
-     * @param device,mobileUser
+     * @param Authorization
+     * @param device_id
      * @return
      */
     @Override
-    public Able_ResponseBody selectFirmwareByDeviceId(Able_Device device,Mobile_User mobileUser) throws Exception {
-        String device_id = device.getDeviceId();
+    public Object selectFirmwareByDeviceId(String Authorization, String device_id) throws Exception {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        if (!"verified".equals(mobileUser.getStatus())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        } else if (!mobileUser.getSfdcId().equals(device.getUsersfid())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        }
 
         //封装请求参数
         Map<String, String> loadAndGetDataParam = new HashMap<>();
@@ -150,16 +169,28 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
 
     /**
      * 更新firmware
-     * @param user,device,targetVersion
+     * @param Authorization
+     * @param device_id
      * @return
      */
     @Override
-    public Able_ResponseBody updateFirmware(Mobile_User user,Able_Device device,
-                                            String targetVersion) throws Exception {
+    public Object updateFirmware(String Authorization, String device_id, String targetVersion) throws Exception {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        if (!"verified".equals(mobileUser.getStatus())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        } else if (!mobileUser.getSfdcId().equals(device.getUsersfid())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        }
+
         String sn = device.getDeviceId();
 
         //获取user的sfid
-        String user_sfid = user.getSfdcId();
+        String user_sfid = mobileUser.getSfdcId();
 
         //拼装getConfirmUpdateResult参数
         Map<String, String> updateParam = new HashMap<>();
@@ -188,7 +219,7 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
         /**封装responseData中的attribute*/
         Map<String, Object> responseDataAttributes = new HashMap<>();
         //version值得是？？？-------》目标版本的值
-        responseDataAttributes.put("version", Integer.valueOf(targetVersion));
+        responseDataAttributes.put("version", Double.valueOf(targetVersion));
         responseData.setAttributes(responseDataAttributes);
         /**封装responseData中的relationships*/
         Map<String, Able_Relationship> relationships = new HashMap<>();
@@ -276,11 +307,25 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
 
     /**
      * 根据firmware_id查询与之关联的device
+     *
+     * @param Authorization
      * @param firmware_id
      * @return
      */
     @Override
-    public Able_Relationship selectDeviceByFirmwareId(String firmware_id) {
+    public Object selectDeviceByFirmwareId(String Authorization, String firmware_id) {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        String device_id = firmware_id.replace("firmwares_", "").trim();
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
+
         //截取设备Id：firmwareId = "firmwares_"+设备Id
         String deviceId = firmware_id.replace("firmwares_", "");
 

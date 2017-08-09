@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * Created by Admin on 2017/7/27.
+ * Modified by Zack on 2017/8/9,delte the "X-Zc-User-Id"
  */
 @Component
 public class CheckAndUpdateOTA {
@@ -23,7 +24,7 @@ public class CheckAndUpdateOTA {
 
         //封装请求头
         Map<String,String> headMaps = HttpUtils.getHeadMaps(timeStamp,"checkUpdate");
-        headMaps.put("X-Zc-User-Id",paramMap.get("user_sfid"));
+//        headMaps.put("X-Zc-User-Id",paramMap.get("user_sfid"));
 
         //封装请求体
         Map<String,String> requsetBody = new HashMap<>();
@@ -42,7 +43,7 @@ public class CheckAndUpdateOTA {
 
         //封装请求头
         Map<String,String> headMaps = HttpUtils.getHeadMaps(timeStamp,"confirmUpdate");
-        headMaps.put("X-Zc-User-Id",paramMap.get("user_sfid"));
+//        headMaps.put("X-Zc-User-Id",paramMap.get("user_sfid"));
 
         //封装请求体
         Map<String,String> requsetBody = new HashMap<>();

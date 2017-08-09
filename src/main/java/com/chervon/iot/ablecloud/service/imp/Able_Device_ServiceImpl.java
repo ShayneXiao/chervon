@@ -7,11 +7,13 @@ import com.chervon.iot.ablecloud.util.*;
 import com.chervon.iot.common.util.GetUTCTime;
 import com.chervon.iot.mobile.mapper.Mobile_UserMapper;
 import com.chervon.iot.mobile.model.Mobile_User;
+import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,20 +40,31 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     @Autowired
     private CheckAndUpdateOTA checkAndUpdateOTA;
     @Autowired
-    private CheckDeviceInfo checkDeviceInfo;
+    private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private Mobile_UserMapper userMapper;
     @Value("${relation_BaseLink}")
     private String baseLink;
 
     /**
      * 查询device的集合并返回
-     * @param mobileUser,pageNum,pageSize
+     * @param Authorization,pageNum,pageSize
+     * @param Authorization
      * @param pageNum
-     * @param pageSize
-     * @return
+     * @param pageSize   @return
      * @throws Exception
      */
     @Override
-    public Able_ResponseListBody selectDeviceList(Mobile_User mobileUser, Integer pageNum, Integer pageSize) throws Exception {
+    public Object selectDeviceList(String Authorization, Integer pageNum, Integer pageSize) throws Exception {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**检查用户是否验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        if (!"verified".equals(mobileUser.getStatus())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        }
+
         String userSfdcId = mobileUser.getSfdcId();
 
         if (pageNum != null && pageSize != null) {
@@ -219,21 +232,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 //将dataFirmwareRelationship添加入responseDataRelationships
                 responseDataRelationships.put("firmware", dataFirmwareRelationship);
 
-                /**封装responseData中的relationships中的heartbeatRelationship*/
-                Able_Relationship dataHeartbeatRelationship = new Able_Relationship();
-                //封装dataHeartbeatRelationship中的links
-                Map<String, String> dataHeartbeatRelationshipLinks = new HashMap<>();
-                dataHeartbeatRelationshipLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");
-                dataHeartbeatRelationshipLinks.put("related", baseLink + "devices/" + device_id + "/heartbeat");
-                dataHeartbeatRelationship.setLinks(dataHeartbeatRelationshipLinks);
-                //封装dataHeartbeatRelationship中的data
-                Map<String, String> dataHeartbeatRelationshipData = new HashMap<>();
-                dataHeartbeatRelationshipData.put("type", "heartbeats");
-                dataHeartbeatRelationshipData.put("id", "heartbeats_" + device_id);
-                dataHeartbeatRelationship.setData(dataHeartbeatRelationshipData);
-                //将dataHeartbeatRelationship添加入responseDataRelationships
-                responseDataRelationships.put("heartbeat", dataHeartbeatRelationship);
-
                 /**将responseDataRelationships封装入responseData*/
                 responseData.setRelationships(responseDataRelationships);
 
@@ -242,13 +240,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 responseDataLinks.put("self", baseLink + "devices/" + device_id);
                 responseData.setLinks(responseDataLinks);
 
-                /**
-                 *
-                 *
-                 *
-                 *
-                 *
-                 * */
+                /**将responseData封装入responseData集合*/
                 responseDataList.add(responseData);
 
                 /**-----------------------------------------------------------------------*/
@@ -265,15 +257,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 checkParam.put("sn", device_id);
                 String checkUpdateJsonResult = checkAndUpdateOTA.getCheckUpdateResult(checkParam);
                 JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
-                //从Able获取Heartbeat数据
-                String resultJson = checkDeviceInfo.getCheckDeviceOnlineResult(checkParam);
-                JsonNode heartbeatJsonNode = jsonMapper.readTree(resultJson);
-                String status = "";
-                if(heartbeatJsonNode.get("online").asInt() == 1){
-                    status = "online";
-                }else if(heartbeatJsonNode.get("online").asInt() == 0){
-                    status = "offline";
-                }
 
                 /**创建included对象*/
                 List<Able_ResponseData> includedList = new ArrayList<>();
@@ -416,24 +399,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 /**将 firmwaresIncluded 添加入includedList*/
                 includedList.add(firmwaresIncluded);
 
-                /**封装included中的 heartbeatIncluded*/
-                /**创建 heartbeatIncluded 对象*/
-                Able_ResponseData heartbeatIncluded = new Able_ResponseData();
-                /**封装 heartbeatIncluded 字段*/
-                heartbeatIncluded.setType("heartbeats");
-                heartbeatIncluded.setId("heartbeats_" + device_id);
-                /**封装 heartbeatIncluded 中的attribute*/
-                Map<String, Object> heartbeatIncludedAttributes = new HashMap<>();
-                heartbeatIncludedAttributes.put("status", status);
-                heartbeatIncludedAttributes.put("created_at", currentUtcTime);
-                heartbeatIncluded.setAttributes(heartbeatIncludedAttributes);
-                /**封装 heartbeatIncluded 中的links*/
-                Map<String, String> heartbeatIncludedLinks = new HashMap<>();
-                heartbeatIncludedLinks.put("self", baseLink + "heartbeats/heartbeats_" + device_id);
-                heartbeatIncluded.setLinks(heartbeatIncludedLinks);
-                /**将heartbeatIncluded  添加入includedList*/
-                includedList.add(heartbeatIncluded);
-
                 /**封装included中的 photosIncluded*/
                 /**创建 photosIncluded 对象*/
                 Able_ResponseData photosIncluded = new Able_ResponseData();
@@ -474,15 +439,23 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 查询特定的device并返回
-     * @param device,mobileUser
-     * @return
+     * @param Authorization
+     * @param device_id @return
      */
     @Override
-    public Object selectDeviceByDeviceId(Able_Device device,Mobile_User mobileUser) throws Exception {
-        System.out.println("----------------进入read device的service层实现类----------------");
-        String device_id = device.getDeviceId();
-        String userSfdcId = mobileUser.getSfdcId();
+    public Object selectDeviceByDeviceId(String Authorization, String device_id) throws Exception {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
 
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
+
+        String userSfdcId = mobileUser.getSfdcId();
 
         Map<String, String> loadAndGetDataParam = new HashMap<>();
         loadAndGetDataParam.put("sn", device_id);
@@ -627,21 +600,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //将dataFirmwareRelationship添加入responseDataRelationships
         responseDataRelationships.put("firmware", dataFirmwareRelationship);
 
-        /**封装responseData中的relationships中的heartbeatRelationship*/
-        Able_Relationship dataHeartbeatRelationship = new Able_Relationship();
-        //封装dataHeartbeatRelationship中的links
-        Map<String, String> dataHeartbeatRelationshipLinks = new HashMap<>();
-        dataHeartbeatRelationshipLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");
-        dataHeartbeatRelationshipLinks.put("related", baseLink + "devices/" + device_id + "/heartbeat");
-        dataHeartbeatRelationship.setLinks(dataHeartbeatRelationshipLinks);
-        //封装dataHeartbeatRelationship中的data
-        Map<String, String> dataHeartbeatRelationshipData = new HashMap<>();
-        dataHeartbeatRelationshipData.put("type", "heartbeats");
-        dataHeartbeatRelationshipData.put("id", "heartbeats_" + device_id);
-        dataHeartbeatRelationship.setData(dataHeartbeatRelationshipData);
-        //将dataHeartbeatRelationship添加入responseDataRelationships
-        responseDataRelationships.put("heartbeat", dataHeartbeatRelationship);
-
         /**封装responseData中的relationships*/
         responseData.setRelationships(responseDataRelationships);
 
@@ -662,19 +620,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         checkParam.put("user_sfid", userSfdcId);
         checkParam.put("sn", device_id);
         String checkUpdateJsonResult = checkAndUpdateOTA.getCheckUpdateResult(checkParam);
-        System.out.println("开始：----------------"
-                + checkUpdateJsonResult.toString() + "----------------：结束");
         JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
-
-        //从Able获取Heartbeat数据
-        String resultJson = checkDeviceInfo.getCheckDeviceOnlineResult(checkParam);
-        JsonNode heartbeatJsonNode = jsonMapper.readTree(resultJson);
-        String status = "";
-        if(heartbeatJsonNode.get("online").asInt() == 1){
-            status = "online";
-        }else if(heartbeatJsonNode.get("online").asInt() == 0){
-            status = "offline";
-        }
 
         /**创建include对象集合*/
         List<Able_ResponseData> includedList = new ArrayList<>();
@@ -780,24 +726,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         /**将 firmwaresIncluded 添加入includedList*/
         includedList.add(firmwaresIncluded);
 
-        /********封装included中的 heartbeatIncluded********/
-        /**创建 heartbeatIncluded 对象*/
-        Able_ResponseData heartbeatIncluded = new Able_ResponseData();
-        /**封装 heartbeatIncluded 字段*/
-        heartbeatIncluded.setType("heartbeats");
-        heartbeatIncluded.setId("heartbeats_" + device_id);
-        /**封装 heartbeatIncluded 中的attribute*/
-        Map<String, Object> heartbeatIncludedAttributes = new HashMap<>();
-        heartbeatIncludedAttributes.put("status", status);
-        heartbeatIncludedAttributes.put("created_at", currentUtcTime);
-        heartbeatIncluded.setAttributes(heartbeatIncludedAttributes);
-        /**封装 heartbeatIncluded 中的links*/
-        Map<String, String> heartbeatIncludedLinks = new HashMap<>();
-        heartbeatIncludedLinks.put("self", baseLink + "heartbeats/heartbeats_" + device_id);
-        heartbeatIncluded.setLinks(heartbeatIncludedLinks);
-        /**将heartbeatIncluded  添加入includedList*/
-        includedList.add(heartbeatIncluded);
-
         /****************封装responseBody****************/
         Able_ResponseBody responseBody = new Able_ResponseBody();
         responseBody.setData(responseData);
@@ -810,14 +738,21 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     /**
      * 根据device_id,deviceStatus更新设备
      *
-     * @param device,mobileUser,updateStatus
-     * @param updateStatus
+     * @param Authorization,device_id,updateStatus
      * @return
      */
     @Override
-    public Object updateDevice(Able_Device device,Mobile_User mobileUser, String updateStatus) throws Exception {
-        //解析数据
-        String device_id = device.getDeviceId();
+    public Object updateDevice(String Authorization, String device_id, String updateStatus) throws Exception {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
 
         /**从able获取controlDevice数据*/
         //拼装参数
@@ -973,20 +908,20 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //将dataFirmwareRelationship添加入responseDataRelationships
         responseDataRelationships.put("firmware", dataFirmwareRelationship);
 
-        /**封装responseData中的relationships中的heartbeatRelationship*/
-        Able_Relationship dataHeartbeatRelationship = new Able_Relationship();
-        //封装dataHeartbeatRelationship中的links
-        Map<String, String> dataHeartbeatRelationshipLinks = new HashMap<>();
-        dataHeartbeatRelationshipLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");
-        dataHeartbeatRelationshipLinks.put("related", baseLink + "devices/" + device_id + "/heartbeat");
-        dataHeartbeatRelationship.setLinks(dataHeartbeatRelationshipLinks);
-        //封装dataHeartbeatRelationship中的data
-        Map<String, String> dataHeartbeatRelationshipData = new HashMap<>();
-        dataHeartbeatRelationshipData.put("type", "heartbeats");
-        dataHeartbeatRelationshipData.put("id", "heartbeats_" + device_id);
-        dataHeartbeatRelationship.setData(dataHeartbeatRelationshipData);
-        //将dataHeartbeatRelationship添加入responseDataRelationships
-        responseDataRelationships.put("heartbeat", dataHeartbeatRelationship);
+//        /**封装responseData中的relationships中的heartbeatRelationship*/
+//        Able_Relationship dataHeartbeatRelationship = new Able_Relationship();
+//        //封装dataHeartbeatRelationship中的links
+//        Map<String, String> dataHeartbeatRelationshipLinks = new HashMap<>();
+//        dataHeartbeatRelationshipLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");
+//        dataHeartbeatRelationshipLinks.put("related", baseLink + "devices/" + device_id + "/heartbeat");
+//        dataHeartbeatRelationship.setLinks(dataHeartbeatRelationshipLinks);
+//        //封装dataHeartbeatRelationship中的data
+//        Map<String, String> dataHeartbeatRelationshipData = new HashMap<>();
+//        dataHeartbeatRelationshipData.put("type", "heartbeats");
+//        dataHeartbeatRelationshipData.put("id", "heartbeats_" + device_id);
+//        dataHeartbeatRelationship.setData(dataHeartbeatRelationshipData);
+//        //将dataHeartbeatRelationship添加入responseDataRelationships
+//        responseDataRelationships.put("heartbeat", dataHeartbeatRelationship);
 
         /********封装reponseBody中的links*******/
         Map<String, String> dataLinks = new HashMap<>();
@@ -1011,15 +946,15 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         checkParam.put("sn", device_id);
         String checkUpdateJsonResult = checkAndUpdateOTA.getCheckUpdateResult(checkParam);
         JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
-        //从Able获取Heartbeat数据
-        String resultJson = checkDeviceInfo.getCheckDeviceOnlineResult(checkParam);
-        JsonNode heartbeatJsonNode = jsonMapper.readTree(resultJson);
-        String status = "";
-        if(heartbeatJsonNode.get("online").asInt() == 1){
-            status = "online";
-        }else if(heartbeatJsonNode.get("online").asInt() == 0){
-            status = "offline";
-        }
+//        //从Able获取Heartbeat数据
+//        String resultJson = checkDeviceInfo.getCheckDeviceOnlineResult(checkParam);
+//        JsonNode heartbeatJsonNode = jsonMapper.readTree(resultJson);
+//        String status = "";
+//        if(heartbeatJsonNode.get("online").asInt() == 1){
+//            status = "online";
+//        }else if(heartbeatJsonNode.get("online").asInt() == 0){
+//            status = "offline";
+//        }
 
 
         /**创建responseBody中的included对象集合*/
@@ -1126,23 +1061,23 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         /**将 firmwaresIncluded 添加入includedList*/
         includedList.add(firmwaresIncluded);
 
-        /********封装included中的 heartbeatIncluded********/
-        /**创建 heartbeatIncluded 对象*/
-        Able_ResponseData heartbeatIncluded = new Able_ResponseData();
-        /**封装 heartbeatIncluded 字段*/
-        heartbeatIncluded.setType("heartbeats");
-        heartbeatIncluded.setId("heartbeats_" + device_id);
-        /**封装 heartbeatIncluded 中的attribute*/
-        Map<String, Object> heartbeatIncludedAttributes = new HashMap<>();
-        heartbeatIncludedAttributes.put("status", status);
-        heartbeatIncludedAttributes.put("created_at", currentUtcTime);
-        heartbeatIncluded.setAttributes(heartbeatIncludedAttributes);
-        /**封装 heartbeatIncluded 中的links*/
-        Map<String, String> heartbeatIncludedLinks = new HashMap<>();
-        heartbeatIncludedLinks.put("self", baseLink + "heartbeats/heartbeats_" + device_id);
-        heartbeatIncluded.setLinks(heartbeatIncludedLinks);
-        /**将heartbeatIncluded  添加入includedList*/
-        includedList.add(heartbeatIncluded);
+//        /********封装included中的 heartbeatIncluded********/
+//        /**创建 heartbeatIncluded 对象*/
+//        Able_ResponseData heartbeatIncluded = new Able_ResponseData();
+//        /**封装 heartbeatIncluded 字段*/
+//        heartbeatIncluded.setType("heartbeats");
+//        heartbeatIncluded.setId("heartbeats_" + device_id);
+//        /**封装 heartbeatIncluded 中的attribute*/
+//        Map<String, Object> heartbeatIncludedAttributes = new HashMap<>();
+//        heartbeatIncludedAttributes.put("status", status);
+//        heartbeatIncludedAttributes.put("created_at", currentUtcTime);
+//        heartbeatIncluded.setAttributes(heartbeatIncludedAttributes);
+//        /**封装 heartbeatIncluded 中的links*/
+//        Map<String, String> heartbeatIncludedLinks = new HashMap<>();
+//        heartbeatIncludedLinks.put("self", baseLink + "heartbeats/heartbeats_" + device_id);
+//        heartbeatIncluded.setLinks(heartbeatIncludedLinks);
+//        /**将heartbeatIncluded  添加入includedList*/
+//        includedList.add(heartbeatIncluded);
 
         /****************封装responseBody中的meta****************/
         Map<String, String> responseMeta = new HashMap<>();
@@ -1158,25 +1093,46 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id删除指定的device
+     * @param Authorization
      * @param device_id
      */
     @Override
-    public void deleteByDeviceId(String device_id) {
-        Able_Device device = new Able_Device();
-        device.setDeviceId(device_id);
+    public ResponseEntity deleteByDeviceId(String Authorization, String device_id) {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        if (!"verified".equals(mobileUser.getStatus())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        } else if (!mobileUser.getSfdcId().equals(device.getUsersfid())) {
+            return DeviceUtils.getCannotPerformResponse(Authorization);
+        }
+
         device.setIsdelete(true);
         deviceMapper.updateByPrimaryKeySelective(device);
+        return null;
     }
 
     /**
      * 根据device_id查询user并返回
      *
-     * @param device,mobileUser
+     * @param Authorization,device_id
      * @return
      */
     @Override
-    public Object selectCreatorByDeviceId(Able_Device device, Mobile_User mobileUser) {
-        String device_id = device.getDeviceId();
+    public Object selectCreatorByDeviceId(String Authorization, String device_id) {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
 
         /**封装responseBody中的links*/
         Map<String, String> contentLinks = new HashMap<>();
@@ -1198,12 +1154,23 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
     /**
      * 根据device_id查询outlet并返回
      *
-     * @param device
+     *
+     * @param Authorization
+     * @param device_id
      * @return
      */
     @Override
-    public Able_Relationship selectOutletsByDeviceId(Able_Device device) throws Exception {
-        String device_id = device.getDeviceId();
+    public Object selectOutletsByDeviceId(String Authorization, String device_id) throws Exception {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
 
         /**创建rsponseBody对象*/
         Able_Relationship responseBody = new Able_Relationship();
@@ -1224,12 +1191,23 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询events并返回
-     * @param device
+     *
+     * @param Authorization
+     * @param device_id
      * @return
      */
     @Override
-    public Able_Relationship selectEventByDeviceId(Able_Device device) {
-        String device_id = device.getDeviceId();
+    public Object selectEventByDeviceId(String Authorization, String device_id) {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
 
         /**创建rsponseBody对象*/
         Able_Relationship responseBody = new Able_Relationship();
@@ -1250,12 +1228,24 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询device_errors并返回
-     * @param device
+     *
+     * @param Authorization
+     * @param device_id
      * @return
      */
     @Override
-    public Able_Relationship selectDeviceErrorsByDeviceId(Able_Device device) {
-        String device_id = device.getDeviceId();
+    public Object selectDeviceErrorsByDeviceId(String Authorization, String device_id) {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
+
 
         /**创建rsponseBody对象*/
         Able_Relationship responseBody = new Able_Relationship();
@@ -1276,12 +1266,23 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
     /**
      * 根据device_id查询firmware并返回
-     * @param device
+     *
+     * @param Authorization
+     * @param device_id
      * @return
      */
     @Override
-    public Able_Relationship selectFirmwareByDeviceId(Able_Device device) {
-        String device_id = device.getDeviceId();
+    public Object selectFirmwareByDeviceId(String Authorization, String device_id) {
+        String authorization = Authorization.replace("Bearer", "").trim();
+        String email = jwtTokenUtil.getEmailFromToken(authorization);
+
+        /**判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证*/
+        Mobile_User mobileUser = userMapper.getUserByEmail(email);
+        Able_Device device = deviceMapper.selectByPrimaryKey(device_id);
+        ResponseEntity<?> checkResponse = DeviceUtils.check(mobileUser, device, Authorization);
+        if (checkResponse != null) {
+            return checkResponse;
+        }
 
         /**封装responseBody中的links*/
         Map<String, String> contentLinks = new HashMap<>();
@@ -1292,32 +1293,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Map<String, String> contentData = new HashMap<>();
         contentData.put("type", "firmwares");
         contentData.put("id", "firmwares_" + device_id);
-
-        /**封装responseBody*/
-        Able_Relationship responseBody = new Able_Relationship();
-        responseBody.setData(contentData);
-        responseBody.setLinks(contentLinks);
-        return responseBody;
-    }
-
-    /**
-     * 根据device_id查询heartbeat并返回
-     * @param device
-     * @return
-     */
-    @Override
-    public Able_Relationship selectHeartbeatByDeviceId(Able_Device device) {
-        String device_id = device.getDeviceId();
-
-        /**封装responseBody中的links*/
-        Map<String, String> contentLinks = new HashMap<>();
-        contentLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");
-        contentLinks.put("related", baseLink + "devices/" + device_id + "/heartbeat");
-
-        /**封装responseBody中的data*/
-        Map<String, String> contentData = new HashMap<>();
-        contentData.put("type", "heartbeats");
-        contentData.put("id", "heartbeats_" + device_id);
 
         /**封装responseBody*/
         Able_Relationship responseBody = new Able_Relationship();
