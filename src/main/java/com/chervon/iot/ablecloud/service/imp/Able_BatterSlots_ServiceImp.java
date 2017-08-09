@@ -132,6 +132,7 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
                     else{
                         attributes.put("battery_status", "unloaded");
                     }
+                    //
                     attributes.put("capacity_amp_hours",String.valueOf(batteryPojo.getDumpEnergy()));
                     attributes.put("charge_level_percent",String.valueOf(batteryPojo.getDumpEnergyPercent()));
                     if(batteryPojo.getDumpEnergyPercent()<20){
@@ -162,13 +163,18 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         attributes1.put("name","T-800");
         attributes1.put("status", DeviceUtils.getDeviceStatus(able_devicePojo.getChargeState()));
         JsonNode jsonNode = mapper.readTree(responseJson);
+        attributes1.put("serial_number",able_devicePojo.getPsId() );
+        //
         attributes1.put("output_watts_hours",String.valueOf(DeviceUtils.getDumpEnergy(jsonNode)));
+        //
         attributes1.put("output_watts",String.valueOf(able_devicePojo.getAc1Power()+able_devicePojo.getAc2Power()+able_devicePojo.getAc3Power()));
         attributes1.put( "charge_time_seconds",String.valueOf(able_devicePojo.getTotalRemainingTime()));
         //
         attributes1.put("discharge_time_seconds","0");
         //
         attributes1.put("is_low_power", "true");
+        //
+        attributes1.put("user_can_control", "true");
         Map<String,String>  includLink = new HashMap<>();
         includLink.put("self",egoBaseLink+"devices/"+device_id);
         Able_ResponseBatteryIncluded able_responseBatteryIncluded= new Able_ResponseBatteryIncluded("device",device_id,attributes1,includLink);
