@@ -2,6 +2,7 @@ package com.chervon.iot.ablecloud.controller;
 
 import com.chervon.iot.ablecloud.service.Able_Device_Service;
 import com.chervon.iot.common.common_util.HttpHeader;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> listDevice(@RequestHeader String Authorization,
                                         @RequestParam(value = "page[number]") String number,
                                         @RequestParam(value = "page[size]",required = false)String size) throws Exception {
@@ -65,6 +67,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> readDevice(@RequestHeader String Authorization, @PathVariable String device_id) throws Exception {
         /**获得responseBody，或response*/
         Object responseBody = deviceService.selectDeviceByDeviceId(Authorization,device_id);
@@ -85,6 +88,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}", method = RequestMethod.PATCH)
+    @ApiAuthentication
     public ResponseEntity<?> updateDevice(@RequestHeader String Authorization,
                                           @PathVariable String device_id,
                                           @RequestBody String requestJson) throws Exception {
@@ -113,6 +117,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}", method = RequestMethod.DELETE)
+    @ApiAuthentication
     public ResponseEntity<?> deleteDevice(@RequestHeader String Authorization, @PathVariable String device_id) {
         /**获得responseBody,或response*/
         ResponseEntity responseBody = deviceService.deleteByDeviceId(Authorization, device_id);
@@ -129,6 +134,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}/relationships/creator", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> relationshipCreator(@RequestHeader String Authorization, @PathVariable String device_id) {
         /**获得responseBody,或response*/
         Object responseBody = deviceService.selectCreatorByDeviceId(Authorization,device_id);
@@ -148,6 +154,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}/relationships/outlets", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> relationshipOutlets(@RequestHeader String Authorization, @PathVariable String device_id) throws Exception {
         /**获得responseBody,或response*/
         Object responseBody = deviceService.selectOutletsByDeviceId(Authorization, device_id);
@@ -167,6 +174,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}/relationships/events", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> relationshipEvents(@RequestHeader String Authorization, @PathVariable String device_id) {
         /**获得responseBody,或response*/
         Object responseBody = deviceService.selectEventByDeviceId(Authorization, device_id);
@@ -186,6 +194,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}/relationships/device_errors", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> relationshipDeviceErrors(@RequestHeader String Authorization, @PathVariable String device_id) {
         /**获得responseBody,或response*/
         Object responseBody = deviceService.selectDeviceErrorsByDeviceId(Authorization, device_id);
@@ -205,6 +214,7 @@ public class Able_Device_Controller {
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}/relationships/firmware", method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity<?> relationshipFirmware(@RequestHeader String Authorization, @PathVariable String device_id) {
         /**获得responseBody,或response*/
         Object responseBody = deviceService.selectFirmwareByDeviceId(Authorization, device_id);

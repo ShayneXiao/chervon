@@ -2,6 +2,7 @@ package com.chervon.iot.ablecloud.controller;
 
 import com.chervon.iot.ablecloud.service.Able_Firmware_Service;
 import com.chervon.iot.common.common_util.HttpHeader;
+import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class Able_Firmware_Controller {
      * @return
      */
     @RequestMapping(value = "devices/{device_id}/firmware",method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity readFirmware(@RequestHeader String Authorization, @PathVariable String device_id) throws Exception {
         /**获得responseBody,或response*/
         Object responseBody = firmwareService.selectFirmwareByDeviceId(Authorization, device_id);
@@ -52,6 +54,7 @@ public class Able_Firmware_Controller {
      * @return
      */
     @RequestMapping(value = "devices/{device_id}/firmware",method = RequestMethod.POST)
+    @ApiAuthentication
     public ResponseEntity updateFirmware(@RequestHeader String Authorization,
                                          @PathVariable String device_id,
                                          @RequestBody String requestJson) throws Exception {
@@ -78,6 +81,7 @@ public class Able_Firmware_Controller {
      * @return
      */
     @RequestMapping(value = "firmwares/{firmware_id}/relationships/device",method = RequestMethod.GET)
+    @ApiAuthentication
     public ResponseEntity relationShipDevice(@RequestHeader String Authorization, @PathVariable String firmware_id) {
         /**获得responseBody,或response*/
         Object responseBody = firmwareService.selectDeviceByFirmwareId(Authorization, firmware_id);

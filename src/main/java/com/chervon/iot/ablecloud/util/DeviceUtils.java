@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class DeviceUtils {
     /**
-     * 获得状态
+     * 获得device的充放电状态
      * @param chargeState
      * @return
      */
@@ -40,7 +40,7 @@ public class DeviceUtils {
     }
 
     /**
-     * 获得剩余电量
+     * 获得剩余电量（dumpEnergy）
      * @param jsonNode
      * @return
      */
@@ -54,7 +54,7 @@ public class DeviceUtils {
     }
 
     /**
-     * 获得输出瓦特
+     * 获得输出瓦特（output_watts）
      * @param jsonNode
      * @return
      */
@@ -81,7 +81,7 @@ public class DeviceUtils {
     }
 
     /**
-     * 获得错误信息对象（404）
+     * 获得错误信息ResultMsg对象（404）
      * @return
      */
     public static ResultMsg getNotFound() {
@@ -157,8 +157,8 @@ public class DeviceUtils {
             responseEntity = DeviceUtils.getCannotPerformResponse(Authorization);
         } else if (mobileUser.getSfdcId() == null || device.getUsersfid() == null ||
                 !mobileUser.getSfdcId().equals(device.getUsersfid())) {
-            System.out.println(mobileUser.getSfdcId());
-            System.out.println(device.getUsersfid());
+            System.out.println("----------User表中的usersfid：'" + mobileUser.getSfdcId() + "'--------");
+            System.out.println("--------Device表中的usersfid：'" + device.getUsersfid() + "'--------");
             responseEntity = DeviceUtils.getCannotPerformResponse(Authorization);
         }
         return responseEntity;

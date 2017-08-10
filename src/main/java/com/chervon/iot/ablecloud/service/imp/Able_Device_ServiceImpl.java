@@ -908,21 +908,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //将dataFirmwareRelationship添加入responseDataRelationships
         responseDataRelationships.put("firmware", dataFirmwareRelationship);
 
-//        /**封装responseData中的relationships中的heartbeatRelationship*/
-//        Able_Relationship dataHeartbeatRelationship = new Able_Relationship();
-//        //封装dataHeartbeatRelationship中的links
-//        Map<String, String> dataHeartbeatRelationshipLinks = new HashMap<>();
-//        dataHeartbeatRelationshipLinks.put("self", baseLink + "devices/" + device_id + "/relationships/heartbeat");
-//        dataHeartbeatRelationshipLinks.put("related", baseLink + "devices/" + device_id + "/heartbeat");
-//        dataHeartbeatRelationship.setLinks(dataHeartbeatRelationshipLinks);
-//        //封装dataHeartbeatRelationship中的data
-//        Map<String, String> dataHeartbeatRelationshipData = new HashMap<>();
-//        dataHeartbeatRelationshipData.put("type", "heartbeats");
-//        dataHeartbeatRelationshipData.put("id", "heartbeats_" + device_id);
-//        dataHeartbeatRelationship.setData(dataHeartbeatRelationshipData);
-//        //将dataHeartbeatRelationship添加入responseDataRelationships
-//        responseDataRelationships.put("heartbeat", dataHeartbeatRelationship);
-
         /********封装reponseBody中的links*******/
         Map<String, String> dataLinks = new HashMap<>();
         dataLinks.put("self", baseLink + "devices/" + device_id);
@@ -946,16 +931,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         checkParam.put("sn", device_id);
         String checkUpdateJsonResult = checkAndUpdateOTA.getCheckUpdateResult(checkParam);
         JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
-//        //从Able获取Heartbeat数据
-//        String resultJson = checkDeviceInfo.getCheckDeviceOnlineResult(checkParam);
-//        JsonNode heartbeatJsonNode = jsonMapper.readTree(resultJson);
-//        String status = "";
-//        if(heartbeatJsonNode.get("online").asInt() == 1){
-//            status = "online";
-//        }else if(heartbeatJsonNode.get("online").asInt() == 0){
-//            status = "offline";
-//        }
-
 
         /**创建responseBody中的included对象集合*/
         List<Able_ResponseData> includedList = new ArrayList<>();
@@ -1060,24 +1035,6 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         firmwaresIncluded.setMeta(firmwaresIncludedMeta);
         /**将 firmwaresIncluded 添加入includedList*/
         includedList.add(firmwaresIncluded);
-
-//        /********封装included中的 heartbeatIncluded********/
-//        /**创建 heartbeatIncluded 对象*/
-//        Able_ResponseData heartbeatIncluded = new Able_ResponseData();
-//        /**封装 heartbeatIncluded 字段*/
-//        heartbeatIncluded.setType("heartbeats");
-//        heartbeatIncluded.setId("heartbeats_" + device_id);
-//        /**封装 heartbeatIncluded 中的attribute*/
-//        Map<String, Object> heartbeatIncludedAttributes = new HashMap<>();
-//        heartbeatIncludedAttributes.put("status", status);
-//        heartbeatIncludedAttributes.put("created_at", currentUtcTime);
-//        heartbeatIncluded.setAttributes(heartbeatIncludedAttributes);
-//        /**封装 heartbeatIncluded 中的links*/
-//        Map<String, String> heartbeatIncludedLinks = new HashMap<>();
-//        heartbeatIncludedLinks.put("self", baseLink + "heartbeats/heartbeats_" + device_id);
-//        heartbeatIncluded.setLinks(heartbeatIncludedLinks);
-//        /**将heartbeatIncluded  添加入includedList*/
-//        includedList.add(heartbeatIncluded);
 
         /****************封装responseBody中的meta****************/
         Map<String, String> responseMeta = new HashMap<>();
