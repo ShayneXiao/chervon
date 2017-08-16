@@ -2,6 +2,8 @@ package com.chervon.iot.ablecloud.service;
 
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 /**
  * Created by ZAC on 2017-7-27.
  * Dexcription：
@@ -26,4 +28,6 @@ public interface Able_Device_Service {
     Object selectDeviceErrorsByDeviceId(String Authorization, String device_id);
 
     Object selectFirmwareByDeviceId(String authorization, String device);
+
+    Object createDevice(String Authorization, String device_id, Map<String, Object> deviceParam) throws Exception;
 }

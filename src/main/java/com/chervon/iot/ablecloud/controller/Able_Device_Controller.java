@@ -1,6 +1,7 @@
 package com.chervon.iot.ablecloud.controller;
 
 import com.chervon.iot.ablecloud.service.Able_Device_Service;
+import com.chervon.iot.ablecloud.util.DeviceUtils;
 import com.chervon.iot.common.common_util.HttpHeader;
 import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,6 +11,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ZAC on 2017-7-27.
@@ -62,9 +66,50 @@ public class Able_Device_Controller {
     }
 
     /**
-     * 根据device_id查询具体某一个device
+     * 根据device_id创建一个新的device
+     *
+     * @param Authorization
      * @param device_id
      * @return
+     */
+    @RequestMapping(value = "devices/{device_id}", method = RequestMethod.POST)
+    @ApiAuthentication
+    public ResponseEntity createDevice(@RequestHeader String Authorization, @PathVariable String device_id,
+                                       @RequestBody String jsonData) throws Exception {
+        JsonNode jsonNode = jsonMapper.readTree(jsonData);
+        String type = jsonNode.get("data").get("type").asText();
+
+        String sn = null;
+        Boolean userCanControl = null;
+        try {
+            sn = jsonNode.get("data").get("attributes").get("serial_number").asText();
+            userCanControl = jsonNode.get("data").get("attributes").get("user_can_control").asBoolean();
+        } catch (Exception e) {
+            return DeviceUtils.getFieldIsWrong();
+        }
+
+        Map<String, Object> deviceParam = new HashMap<>();
+        deviceParam.put("type", type);
+        deviceParam.put("sn", sn);
+        deviceParam.put("user_can_control", userCanControl);
+
+        Object responseBody = deviceService.createDevice(Authorization, device_id, deviceParam);
+        if (responseBody instanceof ResponseEntity) {
+            return (ResponseEntity) responseBody;
+        }
+
+        /**设置响应头*/
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        headers.add("Authorization",Authorization);
+        return new ResponseEntity<Object>(responseBody,headers, HttpStatus.OK);
+    }
+
+    /**
+     * 根据device_id查询具体某一个device
+     * @param Authorization
+     * @param device_id
+     * @return
+     * @throws Exception
      */
     @RequestMapping(value = "/devices/{device_id}", method = RequestMethod.GET)
     @ApiAuthentication

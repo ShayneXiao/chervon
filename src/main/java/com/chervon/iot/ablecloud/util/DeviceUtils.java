@@ -143,6 +143,20 @@ public class DeviceUtils {
     }
 
     /**
+     * 判断用户是否已验证
+     * @param mobileUser
+     * @param Authorization
+     * @return
+     */
+    public static ResponseEntity<?> checkVerified(Mobile_User mobileUser,String Authorization) {
+        ResponseEntity<?> responseEntity = null;
+        if (!"verified".equals(mobileUser.getStatus())) {
+            responseEntity = DeviceUtils.getCannotPerformResponse(Authorization);
+        }
+        return responseEntity;
+    }
+
+    /**
      * 判断用户与device是否为空，用户是否操作的是自己的device，用户是否已验证
      * @param mobileUser
      * @param device
@@ -162,5 +176,26 @@ public class DeviceUtils {
             responseEntity = DeviceUtils.getCannotPerformResponse(Authorization);
         }
         return responseEntity;
+    }
+
+    /**
+     * 获得字段错误时返回的对象
+     * @return
+     */
+    public static ResponseEntity getFieldIsWrong() {
+        ResultMsg.Error error = new ResultMsg.Error();
+        error.setStatus(422);
+        error.setTitle("Field data error.");
+        error.setMessage(null);
+        Map<String, String> source = new HashMap<>();
+        source.put("pointer", "");
+        error.setSource(source);
+
+        List<ResultMsg.Error> errorList = new ArrayList<>();
+        errorList.add(error);
+        ResultMsg resultMsg = new ResultMsg(errorList);
+
+        HttpHeaders headers = HttpHeader.HttpHeader();
+        return new ResponseEntity<Object>(resultMsg, headers, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }
