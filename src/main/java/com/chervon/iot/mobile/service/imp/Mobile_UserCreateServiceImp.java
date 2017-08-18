@@ -148,9 +148,12 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         Mobile_User user = (Mobile_User) operations.get(user_id);
         if (user == null) {
             user = mobile_userMapper.getUserSfid(user_id);
+            if(user == null){
+                ResultMsg  resultMsg =  ErrorResponseUtil.notFound();
+                return new ResponseEntity(resultMsg,headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
+            }
             operations.set("user_id", user);
         }
-        if (user != null) {
             String email = jwtTokenUtil.getEmailFromToken(token.substring(7));
             if(!user.getEmail().equals(email)){
                 ResultMsg  resultMsg =  ErrorResponseUtil.forbidend();
@@ -174,9 +177,6 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             responseBody.setMeta(meta);
             headers.add("Authorization", token);
             return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
-        }
-        ResultMsg resultMsg = ErrorResponseUtil.notFound();
-        return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
     }
 
     /**
@@ -195,34 +195,33 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
         HttpHeaders headers = HttpHeader.HttpHeader();
         headers.add("Authorization", Authorization);
         String email = jwtTokenUtil.getEmailFromToken(Authorization.substring(7));
+        Mobile_User mobUser = (Mobile_User)operations.get(user.getSfdcId());
+        if(mobUser == null){
+            mobUser=mobile_userMapper.getUserSfid(user.getSfdcId());
+            if(mobUser == null){
+                ResultMsg resultMsg = ErrorResponseUtil.notFound();
+                return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
+            }
+            operations.set("user_id", user);
+        }
+
+        //id所关联得email不同
+        if(!mobUser.getEmail().equals(email)){
+            ResultMsg resultMsg = ErrorResponseUtil.forbidend();
+            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
+        }
         Mobile_User mob_User =(Mobile_User)operations.get(user.getEmail());
         if(mob_User==null){
             mob_User = mobile_userMapper.getUserByEmail(user.getEmail());
         }
-        if (!email.equals(user.getEmail()) && mob_User!=null) {
+        //若更改了邮箱，且更改得邮箱已经存在
+        if (!email.equals(user.getEmail()) && mob_User != null) {
             ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
             return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
         }
-        Mobile_User mobile_user =(Mobile_User)operations.get(email);
-        if(mobile_user==null){
-            mobile_user = mobile_userMapper.getUserByEmail(email);
-        }
-        Mobile_User mobUser = (Mobile_User) operations.get(user.getSfdcId());
-        if(mobUser==null){
-            mobUser=mobile_userMapper.getUserSfid(user.getSfdcId());
-            if(mobUser==null){
-                ResultMsg resultMsg = ErrorResponseUtil.notFound();
-                return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_NOT_FOUND.getErrcode()));
-            }
-        }
-        if (!mobile_user.getSfdcId().equals(user.getSfdcId())) {
-            ResultMsg resultMsg = ErrorResponseUtil.forbidend();
-            return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_FORBIDDEN.getErrcode()));
-        }
-        user.setCreatedate(mobile_user.getCreatedate());
-        user.setStatus(mobile_user.getStatus());
+        user.setCreatedate(mobUser.getCreatedate());
+        user.setStatus(mobUser.getStatus());
         if (!email.equals(user.getEmail())) {
-
             user.setStatus("unverified");
             sfdc_request = new Sfdc_Request(user.getName(),null,user.getName(),
                     user.getEmail(),user.getPassword(),user.getStatus());
@@ -243,6 +242,9 @@ public class Mobile_UserCreateServiceImp implements Mobile_UserCreateService {
             else{
                 throw  new Exception();
             }
+        }
+        else{
+            mobile_userMapper.updateByPrimaryKey(user);
         }
         responseData.setType("users");
         responseData.setId(user.getSfdcId());
