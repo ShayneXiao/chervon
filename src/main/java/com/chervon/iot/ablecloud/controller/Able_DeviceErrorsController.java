@@ -8,9 +8,6 @@ import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
-import com.chervon.iot.mobile.util.JavaMailUtil;
-import com.chervon.iot.mobile.util.JsonUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -72,6 +69,7 @@ public class Able_DeviceErrorsController {
     }
 
     @GetMapping("/device_errors/{device_error_id}")
+    @ApiAuthentication
     public ResponseEntity<?> getDeviceErrorByDeviceErrorID(@RequestHeader("Authorization")String authorization, @PathVariable("device_error_id") Integer device_error_id) throws Exception {
         return able_deviceErrorsService.getDeviceErrorByDeviceErrorID(authorization, device_error_id);
     }
