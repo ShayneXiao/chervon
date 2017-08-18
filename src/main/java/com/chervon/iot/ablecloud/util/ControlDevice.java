@@ -11,28 +11,29 @@ import java.util.Map;
 
 /**
  * Created by Admin on 2017/7/26.
+ * Modified on 2017/8/10,delete the "X-Zc-User-Id",change "/controlDevice" to "controlDevice"
  */
 @Component
 public class ControlDevice {
     private final String ablecloudUrl = "http://test.ablecloud.cn:5000/chervonService/v1/";
 
-    public String getControlDeviceResult(Map<String, String> paramMap) throws SQLException, Exception{
+    public String getControlDeviceResult(Map<String, String> paramMap) throws SQLException, Exception {
         //获取当前时间戳
         GetUTCTime getUTCTime = new GetUTCTime();
         long timeStamp = getUTCTime.getCurrentUTCTimeStr();
 
         //封装请求头
-        Map<String,String> headMaps = HttpUtils.getHeadMaps(timeStamp,"controlDevice");
-        headMaps.put("X-Zc-User-Id",paramMap.get("user_sfid"));
+        Map<String, String> headMaps = HttpUtils.getHeadMaps(timeStamp, "controlDevice");
+//        headMaps.put("X-Zc-User-Id",paramMap.get("user_sfid"));
 
         //封装请求体
-        Map<String,String> requsetBody = new HashMap<String,String>();
-        requsetBody.put("sn",paramMap.get("sn"));
-        requsetBody.put("cmd",paramMap.get("cmd"));
+        Map<String, String> requsetBody = new HashMap<String, String>();
+        requsetBody.put("sn", paramMap.get("sn"));
+        requsetBody.put("cmd", paramMap.get("cmd"));
         String requestJson = JsonUtils.objectToJson(requsetBody);
 
         //发送请求，并获得结果
-        String  jsonData= HttpClientUtil.doPostJson(ablecloudUrl+"/controlDevice",requestJson,headMaps);
+        String jsonData = HttpClientUtil.doPostJson(ablecloudUrl + "controlDevice", requestJson, headMaps);
         return jsonData;
     }
 }
