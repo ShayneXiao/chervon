@@ -95,8 +95,21 @@ public class Able_DeviceErrorsController {
     }
 
     @PostMapping("/devices/endedDeviceError")
-    public ResponseEntity<?>  endedDeviceError(String sn, boolean recoverable, String device, String fault, String status){
-        return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault, status);
+    public ResponseEntity<?>  endedDeviceError(@RequestBody String jsonData) throws IOException {
+        JsonNode jsonNode = MAPPER.readTree(jsonData);
+        if(jsonNode != null){
+            String sn = jsonNode.get("sn").asText();
+            boolean recoverable = jsonNode.get("recoverable").asBoolean();
+            String device = jsonNode.get("device").asText();
+            String fault = jsonNode.get("fault").asText();
+            String status = jsonNode.get("status").asText();
+            return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault, status);
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+        Map map = new HashMap();
+        map.put("msg", "request field error");
+        return new ResponseEntity<Object>(map, headers, HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<?> falierResult (String authorization){
