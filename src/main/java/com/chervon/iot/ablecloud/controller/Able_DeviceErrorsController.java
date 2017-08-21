@@ -64,6 +64,7 @@ public class Able_DeviceErrorsController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type","application/vnd.api+json");
         Map map = new HashMap();
+        map.put("code", 422);
         map.put("msg", "request field error");
         return new ResponseEntity<Object>(map, headers, HttpStatus.BAD_REQUEST);
     }
