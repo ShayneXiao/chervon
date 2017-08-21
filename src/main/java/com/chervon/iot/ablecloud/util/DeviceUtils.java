@@ -19,6 +19,37 @@ import java.util.Map;
  */
 public class DeviceUtils {
     /**
+     * 获得一个outlet的状态
+     * @param statusJsonNode
+     * @param outletName
+     * @return
+     */
+    public static String getOutletStatus(JsonNode statusJsonNode, String outletName) {
+        String outletStatus = null;
+        if (statusJsonNode == null || outletName == null || "".equals(outletName)) {
+            return outletStatus;
+        }
+
+        Boolean outlet = null;
+        if ("ac1".equals(outletName)) {
+            outlet = statusJsonNode.get("ac1").asBoolean();
+        } else if ("ac2".equals(outletName)) {
+            outlet = statusJsonNode.get("ac2").asBoolean();
+        } else if ("ac3".equals(outletName)) {
+            outlet = statusJsonNode.get("ac3").asBoolean();
+        } else if ("dc".equals(outletName)) {
+            outlet = statusJsonNode.get("dc").asBoolean();
+        }
+
+        if (outlet == true) {
+            outletStatus = "on";
+        } else {
+            outletStatus = "off";
+        }
+        return outletStatus;
+    }
+
+    /**
      * 获得device的充放电状态
      * @param chargeState
      * @return
@@ -44,7 +75,7 @@ public class DeviceUtils {
      * @param jsonNode
      * @return
      */
-    public static Integer getDumpEnergy(JsonNode jsonNode) {
+    public static Integer getOutputWattHours(JsonNode jsonNode) {
         int bat1DumpEnergy = jsonNode.get("bat1").get("dumpEnergy").asInt();
         int bat2DumpEnergy = jsonNode.get("bat2").get("dumpEnergy").asInt();
         int bat3DumpEnergy = jsonNode.get("bat3").get("dumpEnergy").asInt();
@@ -71,7 +102,7 @@ public class DeviceUtils {
      * @param jsonNode
      * @return
      */
-    public static Double getDumpEnergyPercent(JsonNode jsonNode) {
+    public static Double getCapacityPercentage(JsonNode jsonNode) {
         double dumpEnergyPercent1 = jsonNode.get("bat1").get("dumpEnergyPercent").asDouble();
         double dumpEnergyPercent2 = jsonNode.get("bat2").get("dumpEnergyPercent").asDouble();
         double dumpEnergyPercent3 = jsonNode.get("bat3").get("dumpEnergyPercent").asDouble();

@@ -1,6 +1,5 @@
 package com.chervon.iot.ablecloud.service.imp;
 
-import com.alibaba.fastjson.support.odps.udf.CodecCheck;
 import com.chervon.iot.ablecloud.mapper.Able_DeviceMapper;
 import com.chervon.iot.ablecloud.model.*;
 import com.chervon.iot.ablecloud.service.Able_Device_Service;
@@ -24,7 +23,7 @@ import java.util.Map;
 
 /**
  * Created by ZAC on 2017-7-27.
- * Dexcription：
+ * Description：
  * Modified by:
  * Modified Date:
  */
@@ -102,7 +101,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
                 /************************封装responseBody中的data************************/
                 //所用数据
-                Integer dumpEnergy = DeviceUtils.getDumpEnergy(deviceJsonNode);
+                Integer dumpEnergy = DeviceUtils.getOutputWattHours(deviceJsonNode);
                 Integer output_watts = DeviceUtils.getOutputWatts(deviceJsonNode);
 
                 /**创建responseData对象*/
@@ -121,7 +120,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 responseDataAttribute.put("serial_number", device_id);
                 responseDataAttribute.put("output_watts_hours", dumpEnergy);
                 responseDataAttribute.put("output_watts", output_watts);
-                Double dumpEnergyPercent = DeviceUtils.getDumpEnergyPercent(deviceJsonNode);
+                Double dumpEnergyPercent = DeviceUtils.getCapacityPercentage(deviceJsonNode);
                 responseDataAttribute.put("capacity_percentage", dumpEnergyPercent);
                 //充电时间、放电时间，无返回数据，待定。。。。
                 Integer daiDing = 1111111;
@@ -149,7 +148,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 Map<String, String> dataProductRelationshipData = new HashMap<>();
                 dataProductRelationshipData.put("type", "products");
                 //product应从数据库中查询，由于现在没有清楚product与其他表的关系，暂不查询？？？
-                dataProductRelationshipData.put("id", "products_" + device_id);
+                dataProductRelationshipData.put("id", device_id);
                 dataProductRelationship.setData(dataProductRelationshipData);
                 //将dataProductRelationship添加入responseDataRelationships
                 responseDataRelationships.put("product", dataProductRelationship);
@@ -179,7 +178,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 //封装dataOutletsRelationship中的data
                 Map<String, Object> dataOutletsRelationshipData = new HashMap<>();
                 dataOutletsRelationshipData.put("type", "outlets");
-                dataOutletsRelationshipData.put("id", "outlets_" + device_id);
+                dataOutletsRelationshipData.put("id", device_id);
                 List<Map<String, Object>> dataOutletsRelationshipDataList = new ArrayList<>();
                 dataOutletsRelationshipDataList.add(dataOutletsRelationshipData);
                 dataOutletsRelationship.setData(dataOutletsRelationshipDataList);
@@ -196,7 +195,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 //封装dataEventsRelationship中的data
                 Map<String, String> dataEventsRelationshipData = new HashMap<>();
                 dataEventsRelationshipData.put("type", "events");
-                dataEventsRelationshipData.put("id", "events_" + device_id);
+                dataEventsRelationshipData.put("id", device_id);
                 List<Map<String, Object>> dataEventsRelationshipDataList = new ArrayList<>();
                 dataEventsRelationshipDataList.add(dataOutletsRelationshipData);
                 dataEventsRelationship.setData(dataEventsRelationshipDataList);
@@ -215,7 +214,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 List<Map<String, Object>> deviceErrorsRelationshipDataList = new ArrayList<>();
                 Map<String, Object> deviceErrorsRelationshipData = new HashMap<>();
                 deviceErrorsRelationshipData.put("type", "device_errors");
-                deviceErrorsRelationshipData.put("id", "device_errors_" + device_id);
+                deviceErrorsRelationshipData.put("id", device_id);
                 deviceErrorsRelationshipDataList.add(deviceErrorsRelationshipData);
                 dataDeviceErrorsRelationship.setData(deviceErrorsRelationshipDataList);
                 //将deviceErrorsRelationship添加入responseDataRelationships
@@ -232,7 +231,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 //封装dataFirmwareRelationship中的data
                 Map<String, String> firmwareRelationshipData = new HashMap<>();
                 firmwareRelationshipData.put("type", "firmwares");
-                firmwareRelationshipData.put("id", "firmwares_" + device_id);
+                firmwareRelationshipData.put("id", device_id);
                 dataFirmwareRelationship.setData(firmwareRelationshipData);
                 //将dataFirmwareRelationship添加入responseDataRelationships
                 responseDataRelationships.put("firmware", dataFirmwareRelationship);
@@ -272,7 +271,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 /**封装productsIncluded字段*/
                 //product应从数据库中查询，由于现在没有清楚product与其他表的关系，暂不查询？？？
                 productsIncluded.setType("products");
-                productsIncluded.setId("products_" + device_id);
+                productsIncluded.setId(device_id);
                 /**封装productsIncluded中的relationships*/
                 Map<String, Object> productsIncludedRelationships = new HashMap<>();
                 //封装photo中的links
@@ -282,7 +281,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 //封装photo中的data
                 Map<String, String> photoData = new HashMap<>();
                 photoData.put("type", "photos");
-                photoData.put("id", "photos_" + device_id);
+                photoData.put("id", device_id);
                 //封装photo
                 Map<String, Object> photoMap = new HashMap<>();
                 photoMap.put("links", photoLinks);
@@ -292,7 +291,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 productsIncluded.setRelationships(productsIncludedRelationships);
                 /**封装productsIncluded中的links*/
                 Map<String, String> productsIncludedLinks = new HashMap<>();
-                productsIncludedLinks.put("self", baseLink + "products/products_" + device_id);
+                productsIncludedLinks.put("self", baseLink + "products/" + device_id);
                 productsIncluded.setLinks(productsIncludedLinks);
                 /**封装productsIncluded中的attribute*/
                 Map<String, Object> productsIncludedAttribute = new HashMap<>();
@@ -327,7 +326,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 Able_ResponseData outletsIncluded = new Able_ResponseData();
                 /**封装 outletsIncluded 字段*/
                 outletsIncluded.setType("outlets");
-                outletsIncluded.setId("outlets_" + device_id);
+                outletsIncluded.setId(device_id);
                 /**封装 outletsIncluded 中的attribute*/
                 Map<String, Object> outletsIncludedAttributes = new HashMap<>();
                 //outlet中的数据？？？
@@ -338,7 +337,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 outletsIncluded.setAttributes(outletsIncludedAttributes);
                 /**封装 outletsIncluded 中的links*/
                 Map<String, String> outletsIncludedLinks = new HashMap<>();
-                outletsIncludedLinks.put("self", baseLink + "outlets/outlets_" + device_id);
+                outletsIncludedLinks.put("self", baseLink + "outlets/" + device_id);
                 outletsIncluded.setLinks(outletsIncludedLinks);
                 /**将 outletsIncluded 添加入includedList*/
                 includedList.add(outletsIncluded);
@@ -348,7 +347,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 Able_ResponseData eventsIncluded = new Able_ResponseData();
                 /**封装 eventsIncluded 字段*/
                 eventsIncluded.setType("events");
-                eventsIncluded.setId("events_" + device_id);
+                eventsIncluded.setId(device_id);
                 /**封装 eventsIncluded 中的attribute*/
                 Map<String, Object> eventsIncludedAttributes = new HashMap<>();
                 //able没有提供相关接口？？？
@@ -357,7 +356,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 eventsIncluded.setAttributes(eventsIncludedAttributes);
                 /**封装 eventsIncluded 中的links*/
                 Map<String, String> eventsIncludedLinks = new HashMap<>();
-                eventsIncludedLinks.put("self", baseLink + "events/events_" + device_id);
+                eventsIncludedLinks.put("self", baseLink + "events/" + device_id);
                 eventsIncluded.setLinks(eventsIncludedLinks);
                 /**将 eventsIncluded 添加入includedList*/
                 includedList.add(eventsIncluded);
@@ -367,7 +366,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 Able_ResponseData deviceErrorsIncluded = new Able_ResponseData();
                 /**封装 deviceErrorsIncluded 字段*/
                 deviceErrorsIncluded.setType("device_errors");
-                deviceErrorsIncluded.setId("device_errors_" + device_id);
+                deviceErrorsIncluded.setId(device_id);
                 /**封装 deviceErrorsIncluded 中的attribute*/
                 Map<String, Object> deviceErrorsIncludedAttributes = new HashMap<>();
                 //code具体指的是？？？mapping表中对应的字段找不到对应数据，controlDevice方法返回的值是否是该值
@@ -386,14 +385,14 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 Able_Meta_ResponseData firmwaresIncluded = new Able_Meta_ResponseData();
                 /**封装 firmwaresIncluded 字段*/
                 firmwaresIncluded.setType("firmwares");
-                firmwaresIncluded.setId("firmwares_" + device_id);
+                firmwaresIncluded.setId(device_id);
                 /**封装 firmwaresIncluded 中的attribute*/
                 Map<String, Object> firmwaresIncludedAttributes = new HashMap<>();
                 firmwaresIncludedAttributes.put("version", checkUpdateJsonNode.get("currentVersion").asInt());
                 firmwaresIncluded.setAttributes(firmwaresIncludedAttributes);
                 /**封装 firmwaresIncluded 中的links*/
                 Map<String, String> firmwaresIncludedLinks = new HashMap<>();
-                firmwaresIncludedLinks.put("self", baseLink + "firmwares/firmwares_" + device_id);
+                firmwaresIncludedLinks.put("self", baseLink + "firmwares/" + device_id);
                 firmwaresIncluded.setLinks(firmwaresIncludedLinks);
                 /**封装 firmwaresIncluded 中的meta*/
                 Map<String, Object> firmwaresIncludedMeta = new HashMap<>();
@@ -409,7 +408,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 Able_ResponseData photosIncluded = new Able_ResponseData();
                 /**封装 photosIncluded 字段*/
                 photosIncluded.setType("photos");
-                photosIncluded.setId("photos_" + device_id);
+                photosIncluded.setId(device_id);
                 /**封装 photosIncluded 中的attribute*/
                 Map<String, Object> photosIncludedAttributes = new HashMap<>();
                 //src是从哪里来的？？？
@@ -417,7 +416,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 photosIncluded.setAttributes(photosIncludedAttributes);
                 /**封装 photosIncluded 中的links*/
                 Map<String, String> photosIncludedLinks = new HashMap<>();
-                photosIncludedLinks.put("self", baseLink + "photos/photos_" + device_id);
+                photosIncludedLinks.put("self", baseLink + "photos/" + device_id);
                 photosIncluded.setLinks(photosIncludedLinks);
                 /**将 photosIncluded 添加入includedList*/
                 includedList.add(photosIncluded);
@@ -506,7 +505,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
         /****************封装responseBody中的responseData****************/
         //所用数据
-        Integer dumpEnergy = DeviceUtils.getDumpEnergy(deviceJsonNode);
+        Integer dumpEnergy = DeviceUtils.getOutputWattHours(deviceJsonNode);
         Integer output_watts = DeviceUtils.getOutputWatts(deviceJsonNode);
 
         /********创建responseData对象********/
@@ -530,7 +529,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         responseDataAttributes.put("serial_number", device_id);
         responseDataAttributes.put("output_watts_hours", dumpEnergy);
         responseDataAttributes.put("output_watts", output_watts);
-        Double dumpEnergyPercent = DeviceUtils.getDumpEnergyPercent(deviceJsonNode);
+        Double dumpEnergyPercent = DeviceUtils.getCapacityPercentage(deviceJsonNode);
         responseDataAttributes.put("capacity_percentage", dumpEnergyPercent);
         //充电时间、放电时间，无返回数据，待定。。。。
         Integer daiDing = 1111111;
@@ -558,7 +557,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Map<String, String> dataProductRelationshipData = new HashMap<>();
         dataProductRelationshipData.put("type", "products");
         //product应从数据库中查询，由于现在没有清楚product与其他表的关系，暂不查询？？？
-        dataProductRelationshipData.put("id", "products_" + device_id);
+        dataProductRelationshipData.put("id", device_id);
         dataProductRelationship.setData(dataProductRelationshipData);
         //将dataProductRelationship添加入responseDataRelationships
         responseDataRelationships.put("product", dataProductRelationship);
@@ -588,7 +587,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataOutletsRelationship中的data
         Map<String, Object> dataOutletsRelationshipData = new HashMap<>();
         dataOutletsRelationshipData.put("type", "outlets");
-        dataOutletsRelationshipData.put("id", "outlets_" + device_id);
+        dataOutletsRelationshipData.put("id", device_id);
         List<Map<String, Object>> dataOutletsRelationshipDataList = new ArrayList<>();
         dataOutletsRelationshipDataList.add(dataOutletsRelationshipData);
         dataOutletsRelationship.setData(dataOutletsRelationshipDataList);
@@ -605,7 +604,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataEventsRelationship中的data
         Map<String, String> dataEventsRelationshipData = new HashMap<>();
         dataEventsRelationshipData.put("type", "events");
-        dataEventsRelationshipData.put("id", "events_" + device_id);
+        dataEventsRelationshipData.put("id", device_id);
         List<Map<String, Object>> dataEventsRelationshipDataList = new ArrayList<>();
         dataEventsRelationshipDataList.add(dataOutletsRelationshipData);
         dataEventsRelationship.setData(dataEventsRelationshipDataList);
@@ -623,7 +622,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         List<Map<String, Object>> deviceErrorsRelationshipDataList = new ArrayList<>();
         Map<String, Object> deviceErrorsRelationshipData = new HashMap<>();
         deviceErrorsRelationshipData.put("type", "device_errors");
-        deviceErrorsRelationshipData.put("id", "device_errors_" + device_id);
+        deviceErrorsRelationshipData.put("id", device_id);
         deviceErrorsRelationshipDataList.add(deviceErrorsRelationshipData);
         dataDeviceErrorsRelationship.setData(deviceErrorsRelationshipDataList);
         //将deviceErrorsRelationship添加入responseDataRelationships
@@ -639,7 +638,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataFirmwareRelationship中的data
         Map<String, String> firmwareRelationshipData = new HashMap<>();
         firmwareRelationshipData.put("type", "firmwares");
-        firmwareRelationshipData.put("id", "firmwares_" + device_id);
+        firmwareRelationshipData.put("id", device_id);
         dataFirmwareRelationship.setData(firmwareRelationshipData);
         //将dataFirmwareRelationship添加入responseDataRelationships
         responseDataRelationships.put("firmware", dataFirmwareRelationship);
@@ -683,7 +682,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData outletsIncluded = new Able_ResponseData();
         //封装 outletsIncluded 字段
         outletsIncluded.setType("outlets");
-        outletsIncluded.setId("outlets_" + device_id);
+        outletsIncluded.setId(device_id);
         //封装 outletsIncluded 中的attribute
         Map<String, Object> outletsIncludedAttributes = new HashMap<>();
         //outlet中的数据？？？
@@ -694,7 +693,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         outletsIncluded.setAttributes(outletsIncludedAttributes);
         //封装 outletsIncluded 中的links
         Map<String, String> outletsIncludedLinks = new HashMap<>();
-        outletsIncludedLinks.put("self", baseLink + "outlets/outlets_" + device_id);
+        outletsIncludedLinks.put("self", baseLink + "outlets/" + device_id);
         outletsIncluded.setLinks(outletsIncludedLinks);
         //将 outletsIncluded 添加入includedList
         responseIncludedList.add(outletsIncluded);
@@ -704,7 +703,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData eventsIncluded = new Able_ResponseData();
         //封装 eventsIncluded 字段
         eventsIncluded.setType("events");
-        eventsIncluded.setId("events_" + device_id);
+        eventsIncluded.setId(device_id);
         //封装 eventsIncluded 中的attribute
         Map<String, Object> eventsIncludedAttributes = new HashMap<>();
         //able没有提供相关接口？？？
@@ -713,7 +712,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         eventsIncluded.setAttributes(eventsIncludedAttributes);
         //封装 eventsIncluded 中的links
         Map<String, String> eventsIncludedLinks = new HashMap<>();
-        eventsIncludedLinks.put("self", baseLink + "events/events_" + device_id);
+        eventsIncludedLinks.put("self", baseLink + "events/" + device_id);
         eventsIncluded.setLinks(eventsIncludedLinks);
         //将 eventsIncluded 添加入includedList
         responseIncludedList.add(eventsIncluded);
@@ -723,7 +722,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData deviceErrorsIncluded = new Able_ResponseData();
         //封装 deviceErrorsIncluded 字段
         deviceErrorsIncluded.setType("device_errors");
-        deviceErrorsIncluded.setId("device_errors_" + device_id);
+        deviceErrorsIncluded.setId(device_id);
         //封装 deviceErrorsIncluded 中的attribute
         Map<String, Object> deviceErrorsIncludedAttributes = new HashMap<>();
         //code具体指的是？？？mapping表中对应的字段找不到对应数据，controlDevice方法返回的值是否是该值
@@ -732,7 +731,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         deviceErrorsIncluded.setAttributes(deviceErrorsIncludedAttributes);
         //封装 deviceErrorsIncluded 中的links
         Map<String, String> deviceErrorsIncludedLinks = new HashMap<>();
-        deviceErrorsIncludedLinks.put("self", baseLink + "device_errors/device_errors_" + device_id);
+        deviceErrorsIncludedLinks.put("self", baseLink + "device_errors/" + device_id);
         deviceErrorsIncluded.setLinks(deviceErrorsIncludedLinks);
         //将 deviceErrorsIncluded 添加入includedList
         responseIncludedList.add(deviceErrorsIncluded);
@@ -742,14 +741,14 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_Meta_ResponseData firmwaresIncluded = new Able_Meta_ResponseData();
         //封装 firmwaresIncluded 字段
         firmwaresIncluded.setType("firmwares");
-        firmwaresIncluded.setId("firmwares_" + device_id);
+        firmwaresIncluded.setId(device_id);
         //封装 firmwaresIncluded 中的attribute
         Map<String, Object> firmwaresIncludedAttributes = new HashMap<>();
         firmwaresIncludedAttributes.put("version", checkUpdateJsonNode.get("currentVersion").asInt());
         firmwaresIncluded.setAttributes(firmwaresIncludedAttributes);
         //封装 firmwaresIncluded 中的links
         Map<String, String> firmwaresIncludedLinks = new HashMap<>();
-        firmwaresIncludedLinks.put("self", baseLink + "firmwares/firmwares_" + device_id);
+        firmwaresIncludedLinks.put("self", baseLink + "firmwares/" + device_id);
         firmwaresIncluded.setLinks(firmwaresIncludedLinks);
         //封装 firmwaresIncluded 中的meta
         Map<String, Object> firmwaresIncludedMeta = new HashMap<>();
@@ -805,7 +804,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
         /************************封装responseBody中的data************************/
         //所用数据
-        Integer dumpEnergy = DeviceUtils.getDumpEnergy(deviceJsonNode);
+        Integer dumpEnergy = DeviceUtils.getOutputWattHours(deviceJsonNode);
         Integer output_watts = DeviceUtils.getOutputWatts(deviceJsonNode);
 
         /**创建resposeData对象*/
@@ -824,7 +823,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         responseDataAttributes.put("serial_number", device_id);
         responseDataAttributes.put("output_watts_hours", dumpEnergy);
         responseDataAttributes.put("output_watts", output_watts);
-        Double dumpEnergyPercent = DeviceUtils.getDumpEnergyPercent(deviceJsonNode);
+        Double dumpEnergyPercent = DeviceUtils.getCapacityPercentage(deviceJsonNode);
         responseDataAttributes.put("capacity_percentage", dumpEnergyPercent);
         //充电时间、放电时间，无返回数据，待定。。。。
         Integer daiDing = 1111111;
@@ -852,7 +851,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Map<String, String> dataProductRelationshipData = new HashMap<>();
         dataProductRelationshipData.put("type", "products");
         //product应从数据库中查询，由于现在没有清楚product与其他表的关系，暂不查询？？？
-        dataProductRelationshipData.put("id", "products_" + device_id);
+        dataProductRelationshipData.put("id", device_id);
         dataProductRelationship.setData(dataProductRelationshipData);
         //将dataProductRelationship添加入responseDataRelationships
         responseDataRelationships.put("product", dataProductRelationship);
@@ -882,7 +881,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataOutletsRelationship中的data
         Map<String, Object> dataOutletsRelationshipData = new HashMap<>();
         dataOutletsRelationshipData.put("type", "outlets");
-        dataOutletsRelationshipData.put("id", "outlets_" + device_id);
+        dataOutletsRelationshipData.put("id", device_id);
         List<Map<String, Object>> dataOutletsRelationshipDataList = new ArrayList<>();
         dataOutletsRelationshipDataList.add(dataOutletsRelationshipData);
         dataOutletsRelationship.setData(dataOutletsRelationshipDataList);
@@ -899,7 +898,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataEventsRelationship中的data
         Map<String, String> dataEventsRelationshipData = new HashMap<>();
         dataEventsRelationshipData.put("type", "events");
-        dataEventsRelationshipData.put("id", "events_" + device_id);
+        dataEventsRelationshipData.put("id", device_id);
         List<Map<String, Object>> dataEventsRelationshipDataList = new ArrayList<>();
         dataEventsRelationshipDataList.add(dataOutletsRelationshipData);
         dataEventsRelationship.setData(dataEventsRelationshipDataList);
@@ -917,7 +916,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         List<Map<String, Object>> deviceErrorsRelationshipDataList = new ArrayList<>();
         Map<String, Object> deviceErrorsRelationshipData = new HashMap<>();
         deviceErrorsRelationshipData.put("type", "device_errors");
-        deviceErrorsRelationshipData.put("id", "device_errors_" + device_id);
+        deviceErrorsRelationshipData.put("id", device_id);
         deviceErrorsRelationshipDataList.add(deviceErrorsRelationshipData);
         dataDeviceErrorsRelationship.setData(deviceErrorsRelationshipDataList);
         //将deviceErrorsRelationship添加入responseDataRelationships
@@ -933,7 +932,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataFirmwareRelationship中的data
         Map<String, String> firmwareRelationshipData = new HashMap<>();
         firmwareRelationshipData.put("type", "firmwares");
-        firmwareRelationshipData.put("id", "firmwares_" + device_id);
+        firmwareRelationshipData.put("id", device_id);
         dataFirmwareRelationship.setData(firmwareRelationshipData);
         //将dataFirmwareRelationship添加入responseDataRelationships
         responseDataRelationships.put("firmware", dataFirmwareRelationship);
@@ -987,7 +986,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData outletsIncluded = new Able_ResponseData();
         /**封装 outletsIncluded 字段*/
         outletsIncluded.setType("outlets");
-        outletsIncluded.setId("outlets_" + device_id);
+        outletsIncluded.setId(device_id);
         /**封装 outletsIncluded 中的attribute*/
         Map<String, Object> outletsIncludedAttributes = new HashMap<>();
         //outlet中的数据？？？
@@ -998,7 +997,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         outletsIncluded.setAttributes(outletsIncludedAttributes);
         /**封装 outletsIncluded 中的links*/
         Map<String, String> outletsIncludedLinks = new HashMap<>();
-        outletsIncludedLinks.put("self", baseLink + "outlets/outlets_" + device_id);
+        outletsIncludedLinks.put("self", baseLink + "outlets/" + device_id);
         outletsIncluded.setLinks(outletsIncludedLinks);
         /**将 outletsIncluded 添加入includedList*/
         includedList.add(outletsIncluded);
@@ -1008,7 +1007,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData eventsIncluded = new Able_ResponseData();
         /**封装 eventsIncluded 字段*/
         eventsIncluded.setType("events");
-        eventsIncluded.setId("events_" + device_id);
+        eventsIncluded.setId(device_id);
         /**封装 eventsIncluded 中的attribute*/
         Map<String, Object> eventsIncludedAttributes = new HashMap<>();
         //able没有提供相关接口？？？
@@ -1017,7 +1016,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         eventsIncluded.setAttributes(eventsIncludedAttributes);
         /**封装 eventsIncluded 中的links*/
         Map<String, String> eventsIncludedLinks = new HashMap<>();
-        eventsIncludedLinks.put("self", baseLink + "events/events_" + device_id);
+        eventsIncludedLinks.put("self", baseLink + "events/" + device_id);
         eventsIncluded.setLinks(eventsIncludedLinks);
         /**将 eventsIncluded 添加入includedList*/
         includedList.add(eventsIncluded);
@@ -1027,7 +1026,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData deviceErrorsIncluded = new Able_ResponseData();
         /**封装 deviceErrorsIncluded 字段*/
         deviceErrorsIncluded.setType("device_errors");
-        deviceErrorsIncluded.setId("device_errors_" + device_id);
+        deviceErrorsIncluded.setId(device_id);
         /**封装 deviceErrorsIncluded 中的attribute*/
         Map<String, Object> deviceErrorsIncludedAttributes = new HashMap<>();
         //code具体指的是？？？mapping表中对应的字段找不到对应数据，controlDevice方法返回的值是否是该值
@@ -1036,7 +1035,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         deviceErrorsIncluded.setAttributes(deviceErrorsIncludedAttributes);
         /**封装 deviceErrorsIncluded 中的links*/
         Map<String, String> deviceErrorsIncludedLinks = new HashMap<>();
-        deviceErrorsIncludedLinks.put("self", baseLink + "device_errors/device_errors_" + device_id);
+        deviceErrorsIncludedLinks.put("self", baseLink + "device_errors/" + device_id);
         deviceErrorsIncluded.setLinks(deviceErrorsIncludedLinks);
         /**将 deviceErrorsIncluded 添加入includedList*/
         includedList.add(deviceErrorsIncluded);
@@ -1046,14 +1045,14 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_Meta_ResponseData firmwaresIncluded = new Able_Meta_ResponseData();
         /**封装 firmwaresIncluded 字段*/
         firmwaresIncluded.setType("firmwares");
-        firmwaresIncluded.setId("firmwares_" + device_id);
+        firmwaresIncluded.setId(device_id);
         /**封装 firmwaresIncluded 中的attribute*/
         Map<String, Object> firmwaresIncludedAttributes = new HashMap<>();
         firmwaresIncludedAttributes.put("version", checkUpdateJsonNode.get("currentVersion").asInt());
         firmwaresIncluded.setAttributes(firmwaresIncludedAttributes);
         /**封装 firmwaresIncluded 中的links*/
         Map<String, String> firmwaresIncludedLinks = new HashMap<>();
-        firmwaresIncludedLinks.put("self", baseLink + "firmwares/firmwares_" + device_id);
+        firmwaresIncludedLinks.put("self", baseLink + "firmwares/" + device_id);
         firmwaresIncluded.setLinks(firmwaresIncludedLinks);
         /**封装 firmwaresIncluded 中的meta*/
         Map<String, Object> firmwaresIncludedMeta = new HashMap<>();
@@ -1122,9 +1121,9 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
 
         /****************封装responseBody中的data****************/
         //所用数据
-        Integer dumpEnergy = DeviceUtils.getDumpEnergy(deviceJsonNode);
+        Integer dumpEnergy = DeviceUtils.getOutputWattHours(deviceJsonNode);
         Integer output_watts = DeviceUtils.getOutputWatts(deviceJsonNode);
-        Double dumpEnergyPercent = DeviceUtils.getDumpEnergyPercent(deviceJsonNode);
+        Double dumpEnergyPercent = DeviceUtils.getCapacityPercentage(deviceJsonNode);
 
         /**创建responseData对象*/
         Able_Relationship_ResponseData responseData = new Able_Relationship_ResponseData();
@@ -1194,7 +1193,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataOutletsRelationship中的data
         Map<String, Object> dataOutletsRelationshipData = new HashMap<>();
         dataOutletsRelationshipData.put("type", "outlets");
-        dataOutletsRelationshipData.put("id", "outlets_" + device_id);
+        dataOutletsRelationshipData.put("id", device_id);
         List<Map<String, Object>> dataOutletsRelationshipDataList = new ArrayList<>();
         dataOutletsRelationshipDataList.add(dataOutletsRelationshipData);
         dataOutletsRelationship.setData(dataOutletsRelationshipDataList);
@@ -1211,7 +1210,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataEventsRelationship中的data
         Map<String, String> dataEventsRelationshipData = new HashMap<>();
         dataEventsRelationshipData.put("type", "events");
-        dataEventsRelationshipData.put("id", "events_" + device_id);
+        dataEventsRelationshipData.put("id", device_id);
         List<Map<String, Object>> dataEventsRelationshipDataList = new ArrayList<>();
         dataEventsRelationshipDataList.add(dataOutletsRelationshipData);
         dataEventsRelationship.setData(dataEventsRelationshipDataList);
@@ -1229,7 +1228,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         List<Map<String, Object>> deviceErrorsRelationshipDataList = new ArrayList<>();
         Map<String, Object> deviceErrorsRelationshipData = new HashMap<>();
         deviceErrorsRelationshipData.put("type", "device_errors");
-        deviceErrorsRelationshipData.put("id", "device_errors_" + device_id);
+        deviceErrorsRelationshipData.put("id", device_id);
         deviceErrorsRelationshipDataList.add(deviceErrorsRelationshipData);
         dataDeviceErrorsRelationship.setData(deviceErrorsRelationshipDataList);
         //将deviceErrorsRelationship添加入responseDataRelationships
@@ -1245,7 +1244,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         //封装dataFirmwareRelationship中的data
         Map<String, String> firmwareRelationshipData = new HashMap<>();
         firmwareRelationshipData.put("type", "firmwares");
-        firmwareRelationshipData.put("id", "firmwares_" + device_id);
+        firmwareRelationshipData.put("id", device_id);
         dataFirmwareRelationship.setData(firmwareRelationshipData);
         //将dataFirmwareRelationship添加入responseDataRelationships
         responseDataRelationships.put("firmware", dataFirmwareRelationship);
@@ -1301,7 +1300,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData outletsIncluded = new Able_ResponseData();
         /**封装 outletsIncluded 字段*/
         outletsIncluded.setType("outlets");
-        outletsIncluded.setId("outlets_" + device_id);
+        outletsIncluded.setId(device_id);
         /**封装 outletsIncluded 中的attribute*/
         Map<String, Object> outletsIncludedAttributes = new HashMap<>();
         //outlet中的数据？？？
@@ -1312,7 +1311,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         outletsIncluded.setAttributes(outletsIncludedAttributes);
         /**封装 outletsIncluded 中的links*/
         Map<String, String> outletsIncludedLinks = new HashMap<>();
-        outletsIncludedLinks.put("self", baseLink + "outlets/outlets_" + device_id);
+        outletsIncludedLinks.put("self", baseLink + "outlets/" + device_id);
         outletsIncluded.setLinks(outletsIncludedLinks);
         /**将 outletsIncluded 添加入includedList*/
         includedList.add(outletsIncluded);
@@ -1322,7 +1321,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData eventsIncluded = new Able_ResponseData();
         /**封装 eventsIncluded 字段*/
         eventsIncluded.setType("events");
-        eventsIncluded.setId("events_" + device_id);
+        eventsIncluded.setId(device_id);
         /**封装 eventsIncluded 中的attribute*/
         Map<String, Object> eventsIncludedAttributes = new HashMap<>();
         //able没有提供相关接口？？？
@@ -1331,7 +1330,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         eventsIncluded.setAttributes(eventsIncludedAttributes);
         /**封装 eventsIncluded 中的links*/
         Map<String, String> eventsIncludedLinks = new HashMap<>();
-        eventsIncludedLinks.put("self", baseLink + "events/events_" + device_id);
+        eventsIncludedLinks.put("self", baseLink + "events/" + device_id);
         eventsIncluded.setLinks(eventsIncludedLinks);
         /**将 eventsIncluded 添加入includedList*/
         includedList.add(eventsIncluded);
@@ -1341,7 +1340,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_ResponseData deviceErrorsIncluded = new Able_ResponseData();
         /**封装 deviceErrorsIncluded 字段*/
         deviceErrorsIncluded.setType("device_errors");
-        deviceErrorsIncluded.setId("device_errors_" + device_id);
+        deviceErrorsIncluded.setId(device_id);
         /**封装 deviceErrorsIncluded 中的attribute*/
         Map<String, Object> deviceErrorsIncludedAttributes = new HashMap<>();
         //code具体指的是？？？mapping表中对应的字段找不到对应数据，controlDevice方法返回的值是否是该值
@@ -1350,7 +1349,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         deviceErrorsIncluded.setAttributes(deviceErrorsIncludedAttributes);
         /**封装 deviceErrorsIncluded 中的links*/
         Map<String, String> deviceErrorsIncludedLinks = new HashMap<>();
-        deviceErrorsIncludedLinks.put("self", baseLink + "device_errors/device_errors_" + device_id);
+        deviceErrorsIncludedLinks.put("self", baseLink + "device_errors/" + device_id);
         deviceErrorsIncluded.setLinks(deviceErrorsIncludedLinks);
         /**将 deviceErrorsIncluded 添加入includedList*/
         includedList.add(deviceErrorsIncluded);
@@ -1360,14 +1359,14 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
         Able_Meta_ResponseData firmwaresIncluded = new Able_Meta_ResponseData();
         /**封装 firmwaresIncluded 字段*/
         firmwaresIncluded.setType("firmwares");
-        firmwaresIncluded.setId("firmwares_" + device_id);
+        firmwaresIncluded.setId(device_id);
         /**封装 firmwaresIncluded 中的attribute*/
         Map<String, Object> firmwaresIncludedAttributes = new HashMap<>();
         firmwaresIncludedAttributes.put("version", checkUpdateJsonNode.get("currentVersion").asInt());
         firmwaresIncluded.setAttributes(firmwaresIncludedAttributes);
         /**封装 firmwaresIncluded 中的links*/
         Map<String, String> firmwaresIncludedLinks = new HashMap<>();
-        firmwaresIncludedLinks.put("self", baseLink + "firmwares/firmwares_" + device_id);
+        firmwaresIncludedLinks.put("self", baseLink + "firmwares/" + device_id);
         firmwaresIncluded.setLinks(firmwaresIncludedLinks);
         /**封装 firmwaresIncluded 中的meta*/
         Map<String, Object> firmwaresIncludedMeta = new HashMap<>();

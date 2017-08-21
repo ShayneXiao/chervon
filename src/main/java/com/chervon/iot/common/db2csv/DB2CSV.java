@@ -31,7 +31,7 @@ public class DB2CSV{
 
     private static List<String> filenames = new ArrayList<>();
 
-    @Scheduled(fixedRate = 30 * 60 * 1000)
+    @Scheduled(fixedRateString = "${cronString}")
     public void tableToCSV() throws ConnectionException, AsyncApiException, InterruptedException, IOException {
         System.out.println("-------------Scheduled 启动----");
 

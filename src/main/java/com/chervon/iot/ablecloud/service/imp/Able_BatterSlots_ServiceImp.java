@@ -23,8 +23,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -165,7 +163,7 @@ public class Able_BatterSlots_ServiceImp implements Able_BatterySlots_Service{
         JsonNode jsonNode = mapper.readTree(responseJson);
         attributes1.put("serial_number",able_devicePojo.getPsId() );
         //
-        attributes1.put("output_watts_hours",String.valueOf(DeviceUtils.getDumpEnergy(jsonNode)));
+        attributes1.put("output_watts_hours",String.valueOf(DeviceUtils.getOutputWattHours(jsonNode)));
         //
         attributes1.put("output_watts",String.valueOf(able_devicePojo.getAc1Power()+able_devicePojo.getAc2Power()+able_devicePojo.getAc3Power()));
         attributes1.put( "charge_time_seconds",String.valueOf(able_devicePojo.getTotalRemainingTime()));

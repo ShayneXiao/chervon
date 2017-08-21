@@ -9,7 +9,6 @@ import com.chervon.iot.ablecloud.util.LoadAndGetData;
 import com.chervon.iot.mobile.mapper.Mobile_UserMapper;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
-import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +113,7 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
         responseData.setLinks(resLinks);
         /**封装responseData中的meta*/
         Map<String, Object> meta = new HashMap<>();
+        //status？？？
         meta.put("status", "waiting");
         meta.put("latest_version", checkUpdateJsonNode.get("targetVersion").asDouble());
         responseData.setMeta(meta);
@@ -130,13 +130,15 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
         /**封装included中的attribute*/
         Map<String, Object> includedAttributes = new HashMap<>();
         //name从哪里获取？？？ ---------》device中的product_code
-        includedAttributes.put("name", "T-800");
+        includedAttributes.put("name", device.getProductCode());
         includedAttributes.put("status", deviceStatus);
-        Integer dumpEnergy = DeviceUtils.getDumpEnergy(deviceJsonNode);
+        //设备新加字段，。。。
+        includedAttributes.put("serial_number", device_id);
+        Integer dumpEnergy = DeviceUtils.getOutputWattHours(deviceJsonNode);
         includedAttributes.put("output_watts_hours", dumpEnergy);
         Integer outputWatts = DeviceUtils.getOutputWatts(deviceJsonNode);
         includedAttributes.put("output_watts", outputWatts);
-        Double dumpEnergyPercent = DeviceUtils.getDumpEnergyPercent(deviceJsonNode);
+        Double dumpEnergyPercent = DeviceUtils.getCapacityPercentage(deviceJsonNode);
         includedAttributes.put("capacity_percentage", dumpEnergyPercent);
         //充电时间、放电时间，无返回数据，待定。。。。
         Integer daiDing = 1111111;
@@ -145,7 +147,10 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
         includedAttributes.put("discharge_time_seconds", daiDing2);
         //是否低功率，待定。。。
         includedAttributes.put("is_low_power", true);
+        //用户能否控制，待定。。。
+        includedAttributes.put("user_can_control", true);
         included.setAttributes(includedAttributes);
+
         /**封装included中的links*/
         Map<String, String> includedLinks = new HashMap<>();
         includedLinks.put("self", baseLink + "devices/" + device_id);
@@ -261,11 +266,11 @@ public class Able_Firmware_ServiceImpl implements Able_Firmware_Service {
         //name从哪里获取？？？ ---------》device中的product_code
         includedAttributes.put("name", "T-800");
         includedAttributes.put("status", chargeState);
-        Integer dumpEnergy = DeviceUtils.getDumpEnergy(deviceJsonNode);
+        Integer dumpEnergy = DeviceUtils.getOutputWattHours(deviceJsonNode);
         includedAttributes.put("output_watts_hours", dumpEnergy);
         Integer outputWatts = DeviceUtils.getOutputWatts(deviceJsonNode);
         includedAttributes.put("output_watts", outputWatts);
-        Double dumpEnergyPercent = DeviceUtils.getDumpEnergyPercent(deviceJsonNode);
+        Double dumpEnergyPercent = DeviceUtils.getCapacityPercentage(deviceJsonNode);
         includedAttributes.put("capacity_percentage", dumpEnergyPercent);
         //充电时间、放电时间，无返回数据，待定。。。。
         Integer daiDing = 1111111;

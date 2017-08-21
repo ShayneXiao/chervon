@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -126,9 +125,9 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         attributes.put("name", "T-800");
         attributes.put("status", DeviceUtils.getDeviceStatus(able_devicePojo.getChargeState()));
         JsonNode jsonNode = MAPPER.readTree(responseJson);
-        attributes.put("output_watts_hours", DeviceUtils.getDumpEnergy(jsonNode));
+        attributes.put("output_watts_hours", DeviceUtils.getOutputWattHours(jsonNode));
         attributes.put("output_watts", able_devicePojo.getAc1Power() + able_devicePojo.getAc2Power() + able_devicePojo.getAc3Power());
-        attributes.put("capacity_percentage", DeviceUtils.getDumpEnergyPercent(jsonNode));
+        attributes.put("capacity_percentage", DeviceUtils.getCapacityPercentage(jsonNode));
         attributes.put("charge_time_seconds", jsonNode.get("totalRemainingTime"));
         //待定
         attributes.put("discharge_time_seconds", 0);
@@ -235,9 +234,9 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             attributesChild.put("name", "T-800");
             attributesChild.put("status", DeviceUtils.getDeviceStatus(able_devicePojo.getChargeState()));
             JsonNode jsonNode = MAPPER.readTree(responseJson);
-            attributesChild.put("output_watts_hours", DeviceUtils.getDumpEnergy(jsonNode));
+            attributesChild.put("output_watts_hours", DeviceUtils.getOutputWattHours(jsonNode));
             attributesChild.put("output_watts", able_devicePojo.getAc1Power() + able_devicePojo.getAc2Power() + able_devicePojo.getAc3Power());
-            attributesChild.put("capacity_percentage", DeviceUtils.getDumpEnergyPercent(jsonNode));
+            attributesChild.put("capacity_percentage", DeviceUtils.getCapacityPercentage(jsonNode));
             attributesChild.put("charge_time_seconds", jsonNode.get("totalRemainingTime"));
             //待定
             attributesChild.put("discharge_time_seconds", 0);
