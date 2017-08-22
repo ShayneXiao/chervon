@@ -178,8 +178,8 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
     @Override
     public Object selectOutletByOutletId(String Authorization, String outlet_id) throws Exception {
         /*解析数据*/
-        String device_id = outlet_id.split("_")[1];
-        String outletName = outlet_id.split("_")[0];
+        String device_id = outlet_id.trim().split("_")[1];
+        String outletName = outlet_id.trim().split("_")[0];
         String authorization = Authorization.replace("Bearer", "").trim();
         String email = jwtTokenUtil.getEmailFromToken(authorization);
         Mobile_User mobileUser = userMapper.getUserByEmail(email);
@@ -242,8 +242,8 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
     @Override
     public Object updateOutletByOutletId(String Authorization, String outlet_id, String status) throws Exception {
         /*解析数据*/
-        String device_id = outlet_id.split("_")[0];
-        String outletName = outlet_id.split("_")[1];
+        String device_id = outlet_id.trim().split("_")[0];
+        String outletName = outlet_id.trim().split("_")[1];
         String authorization = Authorization.replace("Bearer", "").trim();
         String email = jwtTokenUtil.getEmailFromToken(authorization);
         Mobile_User mobileUser = userMapper.getUserByEmail(email);
@@ -266,7 +266,7 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
     @Override
     public Object selectDeviceByOutletId(String Authorization, String outlet_id) {
         /*解析数据*/
-        String device_id = outlet_id.split("_")[1];
+        String device_id = outlet_id.trim().split("_")[1];
         String authorization = Authorization.replace("Bearer", "").trim();
         String email = jwtTokenUtil.getEmailFromToken(authorization);
         Mobile_User mobileUser = userMapper.getUserByEmail(email);

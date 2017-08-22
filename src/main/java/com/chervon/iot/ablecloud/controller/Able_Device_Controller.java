@@ -33,23 +33,23 @@ public class Able_Device_Controller {
 
     /**
      * 分页查询device
-     * @param number
-     * @param size
+     *
+     * @param pageNum
+     * @param pageSize
      * @return
      */
     @RequestMapping(value = "/devices", method = RequestMethod.GET)
     @ApiAuthentication
     public ResponseEntity<?> listDevice(@RequestHeader String Authorization,
-                                        @RequestParam(value = "page[number]") String number,
-                                        @RequestParam(value = "page[size]",required = false)String size) throws Exception {
-        int pageNum = 0;
-        int pageSize = 0;
-        try {
-            pageNum = Integer.parseInt(number);
-            pageSize = Integer.parseInt(size);
-        } catch (NumberFormatException e) {
-            throw new NumberFormatException("类型匹配异常");
+                                        @RequestParam(value = "page[number]", required = false) Integer pageNum,
+                                        @RequestParam(value = "page[size]", required = false) Integer pageSize) throws Exception {
+        if (pageNum == null) {
+            pageNum = 1;
         }
+        if (pageSize == null) {
+            pageSize = 4;
+        }
+
         /**获得responseBody，或response*/
         Object responseBody =
                 deviceService.selectDeviceList(Authorization, pageNum, pageSize);
@@ -63,8 +63,8 @@ public class Able_Device_Controller {
 
         /**设置响应头*/
         HttpHeaders headers = HttpHeader.HttpHeader();
-        headers.add("Authorization",Authorization);
-        return new ResponseEntity<Object>(responseBody,headers, HttpStatus.OK);
+        headers.add("Authorization", Authorization);
+        return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
     }
 
     /**

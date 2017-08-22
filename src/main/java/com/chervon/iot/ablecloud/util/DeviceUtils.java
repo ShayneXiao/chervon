@@ -30,7 +30,7 @@ public class DeviceUtils {
             return outletStatus;
         }
 
-        Boolean outlet = null;
+        Boolean outlet;
         if ("ac1".equals(outletName)) {
             outlet = statusJsonNode.get("ac1").asBoolean();
         } else if ("ac2".equals(outletName)) {
@@ -39,6 +39,8 @@ public class DeviceUtils {
             outlet = statusJsonNode.get("ac3").asBoolean();
         } else if ("dc".equals(outletName)) {
             outlet = statusJsonNode.get("dc").asBoolean();
+        } else {
+            outlet = false;
         }
 
         if (outlet == true) {
