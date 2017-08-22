@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -52,11 +51,12 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
      * 根据device_id分页查询outlet集合
      * @param Authorization
      * @param device_id
-     * @param pageable
+     * @param pageNum
+     * @param pageSize
      * @return
      */
     @Override
-    public Object selectOutletList(String Authorization, String device_id, Pageable pageable) throws Exception {
+    public Object selectOutletList(String Authorization, String device_id, Integer pageNum, Integer pageSize) throws Exception {
         String authorization = Authorization.replace("Bearer", "").trim();
         String email = jwtTokenUtil.getEmailFromToken(authorization);
         Mobile_User mobileUser = userMapper.getUserByEmail(email);
@@ -76,9 +76,6 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
         String dataResultJson = loadAndGetData.getDataResult(getDataParam);
         JsonNode dataResultJsonNode = jsonMapper.readTree(dataResultJson);
 
-        int pageNum = pageable.getPageNumber();
-        int pageSize = pageable.getPageSize();
-
         /********创建responseBody对象********/
         Able_ResponseListBody responseBody = new Able_ResponseListBody();
 
@@ -86,17 +83,20 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
         /****创建responseData集合****/
         List<Able_Relationship_ResponseData> responseDataList = new ArrayList<>();
 
-        Integer end = null;
-        if ((pageNum - 1) * pageSize >= 4) {
-            end = 4;
-        } else {
-            end = (pageNum - 1) * pageSize;
+        Integer start = (pageNum - 1) * pageSize;
+        if (start < 0) {
+            start = 0;
         }
-        String outletName = null;
-        Able_Relationship_ResponseData responseData = null;
-        for (int i = 1; i <= end; i++) {
-            outletName = "ac" + i;
-            if (i == 4) {
+        Integer end = (pageNum - 1) * pageSize + pageSize;
+        if (end >= 4) {
+            end = 4;
+        }
+
+        String outletName;
+        Able_Relationship_ResponseData responseData;
+        for (int i = start + 1; i <= end; i++) {
+            outletName = "ac" + (i - 1);
+            if (i == 1) {
                 outletName = "dc";
             }
             /****获得responseData对象*/
@@ -131,11 +131,37 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
         /********封装responseBody中的links********/
         /**封装responseLinks*/
         Map<String, String> responseLinks = new HashMap<>();
+        String first = "?page[number]=1&page[size]=" + pageSize;
+        String last = "?page[number]=" + ((3 / pageSize) + 1) + "&page[size]=" + pageSize;
+        String prev;
+        String next;
+        if (pageNum == 1) {
+            if (pageSize < 4) {
+                prev = "";
+                next = "?page[number]=" + (pageNum + 1) + "&page[size]=" + pageSize;
+            } else {
+                prev = "";
+                next = "";
+            }
+        } else if (pageNum * pageSize >= 4) {
+            if (pageNum > 1) {
+                Integer prevPageNum =
+                        (pageNum - 1) > ((3 / pageSize) + 1) ? ((3 / pageSize) + 1) : (pageNum - 1);
+                prev = "?page[number]=" + prevPageNum + "&page[size]=" + pageSize;
+                next = "";
+            } else {
+                prev = "";
+                next = "";
+            }
+        } else {
+            prev = "?page[number]=" + (pageNum - 1) + "&page[size]=" + pageSize;
+            next = "?page[number]=" + (pageNum + 1) + "&page[size]=" + pageSize;
+        }
         responseLinks.put("self", baseLink + "devices/" + device_id + "/outlets");
-        responseLinks.put("first", baseLink + "devices/" + device_id + "/outlets?page[number]=" + pageNum + "&page[size]=" + pageSize);
-        responseLinks.put("prev", baseLink + "devices/" + device_id + "/outlets?page[number]=" + pageNum + "&page[size]=" + pageSize);
-        responseLinks.put("next", baseLink + "devices/" + device_id + "/outlets?page[number]=" + pageNum + "&page[size]=" + pageSize);
-        responseLinks.put("last", baseLink + "devices/" + device_id + "/outlets?page[number]=" + pageNum + "&page[size]=" + pageSize);
+        responseLinks.put("first", baseLink + "devices/" + device_id + "/outlets" + first);
+        responseLinks.put("prev", baseLink + "devices/" + device_id + "/outlets" + prev);
+        responseLinks.put("next", baseLink + "devices/" + device_id + "/outlets" + next);
+        responseLinks.put("last", baseLink + "devices/" + device_id + "/outlets" + last);
         /*********将responseLinks加入responseBody*/
         responseBody.setLinks(responseLinks);
 
@@ -240,7 +266,7 @@ public class Able_Outlet_ServiceImp implements Able_Outlet_Service {
     @Override
     public Object selectDeviceByOutletId(String Authorization, String outlet_id) {
         /*解析数据*/
-        String device_id = outlet_id.split("_")[0];
+        String device_id = outlet_id.split("_")[1];
         String authorization = Authorization.replace("Bearer", "").trim();
         String email = jwtTokenUtil.getEmailFromToken(authorization);
         Mobile_User mobileUser = userMapper.getUserByEmail(email);

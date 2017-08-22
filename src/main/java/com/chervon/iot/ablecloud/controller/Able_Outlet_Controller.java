@@ -7,7 +7,9 @@ import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +35,29 @@ public class Able_Outlet_Controller {
      * 根据device_id分页查询outlet集合
      * @param Authorization
      * @param device_id
-     * @param pageable
+     * @param pageNum
+     * @param pageSize
      * @return
      */
     @RequestMapping(value = "/devices/{device_id}/outlets",method = RequestMethod.GET)
     @ApiAuthentication
-    public ResponseEntity<?> outletsList(@RequestHeader String Authorization, @PathVariable String device_id , Pageable pageable) throws Exception {
+    public ResponseEntity<?> outletsList(@RequestHeader String Authorization,
+                                         @PathVariable String device_id ,
+                                         @RequestParam(value = "page[number]",required = false) Integer pageNum,
+                                         @RequestParam(value = "page[size]",required = false) Integer pageSize) throws Exception {
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+        if (pageSize == null) {
+            pageSize = 4;
+        }
+
+
         /**获得响应体或响应*/
-        Object responseBody = outletService.selectOutletList(Authorization,device_id,pageable);
+        Object responseBody = outletService.selectOutletList(Authorization, device_id, pageNum, pageSize);
+        if (responseBody instanceof ResponseEntity) {
+            return (ResponseEntity) responseBody;
+        }
 
         /**设置响应头*/
         HttpHeaders headers = HttpHeader.HttpHeader();
@@ -60,6 +77,9 @@ public class Able_Outlet_Controller {
     public ResponseEntity<?> outletRead(@RequestHeader String Authorization,@PathVariable String outlet_id) throws Exception {
         /**获得响应体或响应*/
         Object responseBody = outletService.selectOutletByOutletId(Authorization, outlet_id);
+        if (responseBody instanceof ResponseEntity) {
+            return (ResponseEntity) responseBody;
+        }
 
         /**设置响应头*/
         HttpHeaders headers = HttpHeader.HttpHeader();
@@ -105,6 +125,9 @@ public class Able_Outlet_Controller {
     public ResponseEntity outletRelationshipDevice(@RequestHeader String Authorization,@PathVariable String outlet_id) {
         /**获得响应体或响应*/
         Object responseBody = outletService.selectDeviceByOutletId(Authorization, outlet_id);
+        if (responseBody instanceof ResponseEntity) {
+            return (ResponseEntity) responseBody;
+        }
 
         /**设置响应头*/
         HttpHeaders headers = HttpHeader.HttpHeader();
