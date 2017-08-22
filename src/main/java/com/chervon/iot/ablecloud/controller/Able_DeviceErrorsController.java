@@ -8,9 +8,9 @@ import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.sercuity.filter.ApiAuthentication;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
-import com.chervon.iot.mobile.util.JavaMailUtil;
 import com.chervon.iot.mobile.util.JsonUtils;
-import org.apache.commons.lang.StringUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -20,7 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.*;
+
+import static sun.audio.AudioDevice.device;
 
 /**
  * Created by Shayne on 2017/8/1.
@@ -31,6 +34,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1")
 public class Able_DeviceErrorsController {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     @Resource
     private Able_DeviceErrorsService able_deviceErrorsService;
     @Autowired
@@ -43,12 +47,26 @@ public class Able_DeviceErrorsController {
     private Able_DeviceMapper able_deviceMapper;
 
     @PostMapping("/devices/createDeviceError")
-    public ResponseEntity<?> createDeviceError(String sn, long timestamp, boolean recoverable, String device, String fault) {
-        AbleDeviceErrors ableDeviceErrors = new AbleDeviceErrors(sn, recoverable, device, fault);
-        Date date = new Date(timestamp);
-        ableDeviceErrors.setTimestamp(date);
-        ableDeviceErrors.setStatus("create");
-        return able_deviceErrorsService.createDeviceError(ableDeviceErrors);
+    public ResponseEntity<?> createDeviceError(@RequestBody String jsonData) throws IOException {
+        JsonNode jsonNode = MAPPER.readTree(jsonData);
+        if(jsonNode != null){
+            String sn = jsonNode.get("sn").asText();
+            long timestamp = jsonNode.get("timestamp").asLong();
+            boolean recoverable = jsonNode.get("recoverable").asBoolean();
+            String device = jsonNode.get("device").asText();
+            String fault = jsonNode.get("fault").asText();
+            AbleDeviceErrors ableDeviceErrors = new AbleDeviceErrors(sn, recoverable, device, fault);
+            Date date = new Date(timestamp);
+            ableDeviceErrors.setTimestamp(date);
+            ableDeviceErrors.setStatus("create");
+            return able_deviceErrorsService.createDeviceError(ableDeviceErrors);
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+        Map map = new HashMap();
+        map.put("code", 422);
+        map.put("msg", "request field error");
+        return new ResponseEntity<Object>(map, headers, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/devices/{device_id}/device_errors")
@@ -72,13 +90,27 @@ public class Able_DeviceErrorsController {
     }
 
     @GetMapping("/device_errors/{device_error_id}")
+    @ApiAuthentication
     public ResponseEntity<?> getDeviceErrorByDeviceErrorID(@RequestHeader("Authorization")String authorization, @PathVariable("device_error_id") Integer device_error_id) throws Exception {
         return able_deviceErrorsService.getDeviceErrorByDeviceErrorID(authorization, device_error_id);
     }
 
     @PostMapping("/devices/endedDeviceError")
-    public ResponseEntity<?>  endedDeviceError(String sn, boolean recoverable, String device, String fault, String status){
-        return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault, status);
+    public ResponseEntity<?>  endedDeviceError(@RequestBody String jsonData) throws IOException {
+        JsonNode jsonNode = MAPPER.readTree(jsonData);
+        if(jsonNode != null){
+            String sn = jsonNode.get("sn").asText();
+            boolean recoverable = jsonNode.get("recoverable").asBoolean();
+            String device = jsonNode.get("device").asText();
+            String fault = jsonNode.get("fault").asText();
+            String status = jsonNode.get("status").asText();
+            return able_deviceErrorsService.endedDeviceError(sn, recoverable, device, fault, status);
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type","application/vnd.api+json");
+        Map map = new HashMap();
+        map.put("msg", "request field error");
+        return new ResponseEntity<Object>(map, headers, HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<?> falierResult (String authorization){

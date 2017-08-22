@@ -1,18 +1,15 @@
 package com.chervon.iot.mobile.sercuity.filter;
 
 import com.chervon.iot.common.exception.ResultMsg;
-import com.chervon.iot.common.exception.ResultStatusCode;
 import com.chervon.iot.mobile.model.Mobile_User;
 import com.chervon.iot.mobile.sercuity.JwtTokenUtil;
 import com.chervon.iot.mobile.service.Mobile_UserLoginService;
 import com.chervon.iot.mobile.util.ErrorResponseUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by Shayne on 2017/8/7.

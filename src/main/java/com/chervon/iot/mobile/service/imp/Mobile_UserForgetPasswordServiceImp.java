@@ -83,10 +83,13 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
         mobile_user=(Mobile_User) operations.get(email);
         if(mobile_user==null){
             mobile_user = mobile_userMapper.getUserByEmail(email);
+            if(mobile_user == null) {
+                ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
+                return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
+            }
         }
         //设置1小时token
         jwtTokenUtil.setExpiration(expirationhours);
-        if (mobile_user != null) {
             final String token = jwtTokenUtil.generateToken(mobile_user, device);
             String url = emailUrl + "resets/Bearer " + token+"/email";
             sendEmail.sendEmail(url,email,mobile_user.getName());
@@ -106,9 +109,6 @@ public class Mobile_UserForgetPasswordServiceImp implements Mobile_UserForgetPas
             responseBody.setData(responData);
             responseBody.setMeta(meta);
             return new ResponseEntity<Object>(responseBody, headers, HttpStatus.OK);
-        }
-        ResultMsg resultMsg = ErrorResponseUtil.errorFiled();
-        return new ResponseEntity(resultMsg, headers, HttpStatus.valueOf(ResultStatusCode.SC_BAD_REQUEST.getErrcode()));
     }
 
     /**

@@ -57,6 +57,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         String key = ableDeviceErrors.getSn() + ableDeviceErrors.getRecoverable() + ableDeviceErrors.getDevice() + ableDeviceErrors.getFault();
         Object deviceErrors = valueOperations.get(key);
         Map map = new HashMap();
+        map.put("code", 200);
         if(deviceErrors == null){
             ableDeviceErrorsMapper.insert(ableDeviceErrors);
             valueOperations.set(key, JsonUtils.objectToJson(ableDeviceErrors));
@@ -264,6 +265,7 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
         String key = sn + recoverable + device + fault;
         String deviceErrors = valueOperations.get(key);
         Map map = new HashMap();
+        map.put("code", 200);
         if(deviceErrors != null){
             if("closed".equals(status) || "pendding".equals(status)){
                 redisTemplate.delete(key);
@@ -281,8 +283,6 @@ public class Able_DeviceErrorsServiceImpl implements Able_DeviceErrorsService {
             map.put("msg", "This Device Error doesn't existed !!!");
             return new ResponseEntity<Object>(map, headers, HttpStatus.OK);
         }
-
-
     }
 
     private ResponseEntity<?> falierResult (String authorization){
