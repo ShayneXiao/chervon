@@ -85,7 +85,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
             JsonNode deviceJsonNodeList = jsonMapper.readTree(dataList);
 
             List<Able_ResponseData> responseDataList = new ArrayList<>();
-            List<Able_ResponseData> includeds = new ArrayList<>();
+            List<Able_ResponseData> includedList = new ArrayList<>();
             Map<String, String> metaMap = new HashMap<>();
             Map<String, String> linksRes = new HashMap<>();
 
@@ -263,7 +263,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
                 JsonNode checkUpdateJsonNode = jsonMapper.readTree(checkUpdateJsonResult);
 
                 /**创建included对象*/
-                List<Able_ResponseData> includedList = new ArrayList<>();
+//                List<Able_ResponseData> includedList = new ArrayList<>();
 
                 /**封装included中的productsIncluded*/
                 /**创建productsIncluded对象*/
@@ -433,7 +433,7 @@ public class Able_Device_ServiceImpl implements Able_Device_Service {
             /**********封装reponseBody对象**********/
             responseBody = new Able_ResponseListBody();
             responseBody.setData(responseDataList);
-            responseBody.setIncluded(includeds);
+            responseBody.setIncluded(includedList);
             responseBody.setMeta(metaMap);
             responseBody.setLinks(linksRes);
         }
