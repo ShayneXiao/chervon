@@ -33,6 +33,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Boy on 2017/6/26.
+ * Modified by Zack on 2017/8/29
+ * Modified description:修改了返回错误相关
  */
 @RestController
 @RequestMapping("/api/v1")
@@ -82,7 +84,10 @@ public class Mobile_LoginUserController {
         }
         else{
             List<ResultMsg.Error> errors = new ArrayList<ResultMsg.Error>();
-            ResultMsg.Error error = new ResultMsg.Error(resultStatusCode.getErrcode(),resultStatusCode.getTitle(),null);
+//            ResultMsg.Error error = new ResultMsg.Error(resultStatusCode.getErrcode(),resultStatusCode.getTitle(),null);
+            /*>>>>>>>>由Zack修改--------*/
+            ResultMsg.Error error = new ResultMsg.Error(resultStatusCode.getErrcode(),resultStatusCode.getTitle(),"Username or password is incorrect.");
+            /*<<<<<<<<由Zack修改--------*/
             errors.add(error);
             ResultMsg resultMsg = new ResultMsg(errors);
             HttpStatus.valueOf(resultStatusCode.getErrcode());

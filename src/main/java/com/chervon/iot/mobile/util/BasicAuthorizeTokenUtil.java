@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import sun.misc.BASE64Decoder;
 
-
 /**
  * Created by Admin on 2017/7/11.
+ * Modified by Zack on 2017/8/29
+ * Modified description:修改了返回错误相关
  */
 @Component
 public class BasicAuthorizeTokenUtil {
@@ -52,7 +53,10 @@ public class BasicAuthorizeTokenUtil {
                         return ResultStatusCode.SC_OK;
                     }
                     else{
-                        return ResultStatusCode.SC_BAD_REQUEST;
+//                        return ResultStatusCode.SC_BAD_REQUEST;
+                        /*>>>>>>>>由Zack修改--------*/
+                        return ResultStatusCode.SC_PERMISSION_DENIED;
+                        /*<<<<<<<<由Zack修改--------*/
                     }
                 }
             }
