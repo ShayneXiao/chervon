@@ -149,7 +149,7 @@ public class DeviceUtils {
         ResultMsg resultMsg = new ResultMsg(errorList);
 
         HttpHeaders headers = HttpHeader.HttpHeader();
-        headers.add("Authorization","Bearer "+Authorization);
+        headers.add("Authorization", Authorization);
         return new ResponseEntity<Object>(resultMsg, headers, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
@@ -171,7 +171,7 @@ public class DeviceUtils {
         ResultMsg resultMsg = new ResultMsg(errorList);
 
         HttpHeaders headers = HttpHeader.HttpHeader();
-        headers.add("Authorization","Bearer "+Authorization);
+        headers.add("Authorization", Authorization);
         return new ResponseEntity<Object>(resultMsg, headers, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
